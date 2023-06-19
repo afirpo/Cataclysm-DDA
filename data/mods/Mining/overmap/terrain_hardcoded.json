@@ -1,0 +1,22 @@
+[
+  {
+    "type": "overmap_terrain",
+    "id": "cave_innawood",
+    "name": "cave",
+    "looks_like": "cave",
+    "sym": "C",
+    "color": "brown",
+    "see_cost": 2,
+    "flags": [ "NO_ROTATE", "SOURCE_SAFETY" ]
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "cave_underground_innawood",
+    "name": "cave",
+    "looks_like": "cave_underground",
+    "sym": "C",
+    "color": "brown",
+    "see_cost": 2,
+    "flags": [ "NO_ROTATE", "SOURCE_SAFETY" ]
+  }
+]
