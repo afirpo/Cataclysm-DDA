@@ -1,0 +1,13 @@
+[
+  {
+    "type": "MOD_INFO",
+    "id": "primitivemining",
+    "name": "Primitive Mining",
+    "authors": [ "Coolander" ],
+    "maintainers": [ "Coolander" ],
+    "description": "",
+    "category": "total_conversion",
+    "dependencies": [ "dda" ],
+    "obsolete": false
+  }
+]
