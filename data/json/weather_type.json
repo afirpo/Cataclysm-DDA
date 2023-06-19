@@ -341,7 +341,7 @@
     "priority": 120,
     "condition": {
       "and": [
-        { "math": [ "cause_early_portal_storm", "==", "1" ] },
+        { "math": [ "cause_early_portal_storm", "==", "-123" ] },
         {
           "compare_num": [
             { "distance": [ { "context_val": "weather_location" }, { "global_val": "portal_storm_center" } ] },
@@ -375,7 +375,7 @@
     "priority": 130,
     "condition": {
       "and": [
-        { "math": [ "cause_portal_storm", "==", "1" ] },
+        { "math": [ "cause_portal_storm", "==", "-123" ] },
         {
           "compare_num": [
             { "distance": [ { "context_val": "weather_location" }, { "global_val": "portal_storm_center" } ] },
@@ -409,7 +409,7 @@
     "priority": 131,
     "condition": {
       "and": [
-        { "math": [ "cause_portal_storm", "==", "1" ] },
+        { "math": [ "cause_portal_storm", "==", "-123" ] },
         {
           "compare_num": [
             { "distance": [ { "context_val": "weather_location" }, { "global_val": "portal_storm_center" } ] },
@@ -443,7 +443,7 @@
     "priority": 132,
     "condition": {
       "and": [
-        { "math": [ "cause_portal_storm", "==", "1" ] },
+        { "math": [ "cause_portal_storm", "==", "-123" ] },
         {
           "compare_num": [
             { "distance": [ { "context_val": "weather_location" }, { "global_val": "portal_storm_center" } ] },
