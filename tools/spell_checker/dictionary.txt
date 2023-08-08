@@ -290,6 +290,8 @@ biofuel
 biofuels
 biographic
 biohacker
+biokinesis
+biokinetic
 biollante
 biomachine
 biomancer
@@ -1394,7 +1396,10 @@ hydria
 hydrocracking
 hydrogel
 hygrometer
+hygroscope
+hygroscopes
 hygroscopic
+hygroscopy
 hyolith
 hypacrosaurus
 hyperaggressive
@@ -1639,6 +1644,7 @@ lemony
 lemure
 lense
 leptoceratops
+lessers
 letal
 lettin
 leuchtet
@@ -2341,6 +2347,8 @@ pushmower
 pussywillows
 putrescent
 pwn
+pyrokinesis
+pyrokinetic
 pyrolusite
 pyrolysis
 pyrometer
