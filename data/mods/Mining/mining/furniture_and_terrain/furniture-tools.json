@@ -11,15 +11,65 @@
     "coverage": 40,
     "required_str": -1,
     "crafting_pseudo_item": "bloomery",
-    "flags": [ "SEALED", "CONTAINER", "NOITEM", "EASY_DECONSTRUCT", "MINEABLE" ],
-    "deconstruct": { "items": [ { "item": "rock", "count": 30 } ] },
+    "flags": ["SEALED", "CONTAINER", "NOITEM", "EASY_DECONSTRUCT", "MINEABLE"],
+    "deconstruct": { "items": [{ "item": "rock", "count": 30 }] },
     "examine_action": "reload_furniture",
     "bash": {
       "str_min": 18,
       "str_max": 50,
       "sound": "crash!",
       "sound_fail": "whump.",
-      "items": [ { "item": "rock", "count": [ 10, 20 ] } ]
+      "items": [{ "item": "rock", "count": [10, 20] }]
+    }
+  },
+  {
+    "type": "furniture",
+    "id": "f_wwaterbed",
+    "name": "wastewater bed",
+    "description": "Slow sand filtration bed for wastewater treatment.",
+    "looks_like": "f_planter",
+    "symbol": "X",
+    "color": "white",
+    "move_cost_mod": -1,
+    "coverage": 40,
+    "required_str": -1,
+    "crafting_pseudo_item": "wastewater_bed",
+    "flags": ["FLAT", "NOITEM", "EASY_DECONSTRUCT"],
+    "deconstruct": {
+      "items": [
+        {
+          "item": "2x4",
+          "count": [11, 12]
+        },
+        {
+          "item": "nail",
+          "charges": [30, 36]
+        },
+        {
+          "item": "pebble",
+          "charges": [180, 200]
+        }
+      ]
+    },
+    "bash": {
+      "str_min": 6,
+      "str_max": 14,
+      "sound": "crunch.",
+      "sound_fail": "whish.",
+      "items": [
+        {
+          "item": "2x4",
+          "count": [4, 10]
+        },
+        {
+          "item": "nail",
+          "charges": [15, 30]
+        },
+        {
+          "item": "pebble",
+          "charges": [150, 200]
+        }
+      ]
     }
   }
 ]

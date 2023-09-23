@@ -8,5 +8,10 @@
     "type": "construction_group",
     "id": "build_bloomery",
     "name": "Build Bloomery"
+  },
+  {
+    "type": "construction_group",
+    "id": "build_wastewater_bed",
+    "name": "Build Wastewater Bed"
   }
 ]
