@@ -6952,13 +6952,16 @@ void game::zones_manager()
         if( zone_cnt > 0 ) {
             const zone_data &zone = zones[active_index].get();
 
+            // NOLINTNEXTLINE(cata-use-named-point-constants)
+            mvwprintz( w_zones_options, point( 1, 0 ), c_white, mgr.get_name_from_type( zone.get_type() ) );
+
             if( zone.has_options() ) {
                 const auto &descriptions = zone.get_options().get_descriptions();
 
                 // NOLINTNEXTLINE(cata-use-named-point-constants)
-                mvwprintz( w_zones_options, point( 1, 0 ), c_white, _( "Options" ) );
+                mvwprintz( w_zones_options, point( 1, 1 ), c_white, _( "Options" ) );
 
-                int y = 1;
+                int y = 2;
                 for( const auto &desc : descriptions ) {
                     mvwprintz( w_zones_options, point( 3, y ), c_white, desc.first );
                     mvwprintz( w_zones_options, point( 20, y ), c_white, desc.second );
@@ -7081,11 +7084,7 @@ void game::zones_manager()
                     //Draw Zone name
                     mvwprintz( w_zones, point( 3, iNum - start_index ), colorLine,
                                //~ "P: <Zone Name>" represents a personal zone
-                               trim_by_length( ( zone.get_is_personal() ? _( "P: " ) : "" ) + zone.get_name(), 15 ) );
-
-                    //Draw Type name
-                    mvwprintz( w_zones, point( 20, iNum - start_index ), colorLine,
-                               mgr.get_name_from_type( zone.get_type() ) );
+                               trim_by_length( ( zone.get_is_personal() ? _( "P: " ) : "" ) + zone.get_name(), 28 ) );
 
                     tripoint_abs_ms center = zone.get_center_point();
 
@@ -9088,6 +9087,28 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
     return game::vmenu_ret::QUIT;
 }
 
+void game::insert_item( drop_locations &targets )
+{
+    if( targets.empty() || !targets.front().first ) {
+        return;
+    }
+    std::string title = string_format( _( "%s: %s and %d items" ), _( "Insert item" ),
+                                       targets.front().first->tname(), targets.size() - 1 );
+    item_location item_loc = inv_map_splice( [ &, targets]( const item_location & it ) {
+        if( targets.front().first.parent_item() == it ) {
+            return false;
+        }
+        return it->is_container() && !it->is_corpse() && rate_action_insert( u, it ) == hint_rating::good;
+    }, title, 1, _( "You have no container to insert items." ) );
+
+    if( !item_loc ) {
+        add_msg( _( "Never mind." ) );
+        return;
+    }
+
+    u.assign_activity( insert_item_activity_actor( item_loc, targets, true ) );
+}
+
 void game::insert_item()
 {
     item_location item_loc = inv_map_splice( [&]( const item_location & it ) {
@@ -10301,7 +10322,8 @@ bool game::walk_move( const tripoint &dest_loc, const bool via_ramp, const bool 
         }
     }
 
-    const float dest_light_level = get_map().ambient_light_at( dest_loc );
+    const int ramp_adjust = via_ramp ? u.posz() : dest_loc.z;
+    const float dest_light_level = get_map().ambient_light_at( tripoint( dest_loc.xy(), ramp_adjust ) );
 
     // Allow players with nyctophobia to move freely through cloudy and dark tiles
     const float nyctophobia_threshold = LIGHT_AMBIENT_LIT - 3.0f;
