@@ -197,8 +197,6 @@ static const mtype_id mon_zombie_smoker( "mon_zombie_smoker" );
 static const mtype_id mon_zombie_soldier( "mon_zombie_soldier" );
 static const mtype_id mon_zombie_survivor( "mon_zombie_survivor" );
 
-static const npc_class_id NC_BOUNTY_HUNTER( "NC_BOUNTY_HUNTER" );
-
 static const quality_id qual_BOIL( "BOIL" );
 static const quality_id qual_JACK( "JACK" );
 static const quality_id qual_LIFT( "LIFT" );
@@ -316,7 +314,9 @@ item::item( const itype *type, time_point turn, int qty ) : type( type ), bday( 
     } else {
         if( type->tool && type->tool->rand_charges.size() > 1 ) {
             const int charge_roll = rng( 1, type->tool->rand_charges.size() - 1 );
-            charges = rng( type->tool->rand_charges[charge_roll - 1], type->tool->rand_charges[charge_roll] );
+            const int charge_count = rng( type->tool->rand_charges[charge_roll - 1],
+                                          type->tool->rand_charges[charge_roll] );
+            ammo_set( ammo_default(), charge_count );
         } else {
             charges = type->charges_default();
         }
@@ -5618,6 +5618,36 @@ void item::final_info( std::vector<iteminfo> &info, const iteminfo_query *parts,
                               "<info>sickly green glow</info>." ) );
     }
 
+    if( type->milling_data ) {
+        if( parts->test( iteminfo_parts::DESCRIPTION_MILLEABLE ) ) {
+
+            const islot_milling &mdata = *type->milling_data;
+            const int conv_rate = mdata.conversion_rate_;
+            std::string rate_info;
+            if( conv_rate < 1 ) {
+                const int ratio = int( 1 / mdata.conversion_rate_ );
+                rate_info = string_format(
+                                _( "* You need at least <neutral>%i %s</neutral> to produce <neutral>1 %s</neutral>." ), ratio,
+                                type->nname( ratio ),
+                                mdata.into_->nname( 1 ) );
+            } else {
+                const int ratio = int( mdata.conversion_rate_ );
+                rate_info = string_format(
+                                _( "* <neutral>1 %s</neutral> can be turned into <neutral>%i %s</neutral>." ),
+                                type->nname( 1 ), ratio,
+                                mdata.into_->nname( ratio ) );
+            }
+            info.emplace_back( "DESCRIPTION",
+                               string_format( _( "* This item can be <info>milled</info>." ) ) );
+            info.emplace_back( "DESCRIPTION", rate_info );
+            info.emplace_back( "DESCRIPTION",
+                               string_format(
+                                   _( "* It has a conversion rate of <neutral>1 %s</neutral> for <neutral>%.3f %s</neutral>." ),
+                                   type->nname( 1 ),
+                                   mdata.conversion_rate_, mdata.into_->nname( mdata.conversion_rate_ ) ) );
+        }
+    }
+
     if( is_brewable() ) {
         const item &brewed = *this;
         if( parts->test( iteminfo_parts::DESCRIPTION_BREWABLE_DURATION ) ) {
@@ -6343,28 +6373,34 @@ void item::handle_pickup_ownership( Character &c )
                 return &cr != &c && owned_by && rl_dist( cr.pos(), c.pos() ) < MAX_VIEW_DISTANCE &&
                        cr.sees( c.pos() );
             };
-            std::vector<Creature *> witnesses = g->get_creatures_if( sees_stealing );
-            /*
-                for( &elem : witness ) {
-                        elem.say( "<witnessed_thievery>", 7 );
-                        npc *npc_to_add = &elem;
-                        witnesses.push_back( npc_to_add );
+            const auto sort_criteria = []( const Creature * lhs, const Creature * rhs ) {
+                const npc *const lnpc = lhs->as_npc();
+                const npc *const rnpc = rhs->as_npc();
+                if( !lnpc && !rnpc ) {
+                    const monster *const lmon = lhs->as_monster();
+                    const monster *const rmon = rhs->as_monster();
+                    // Sort more difficult monsters first
+                    return ( lmon ? lmon->type->difficulty : 0 ) > ( rmon ? rmon->type->difficulty : 0 );
+                } else if( lnpc && !rnpc ) {
+                    return true;
+                } else if( !lnpc && rnpc ) {
+                    return false;
                 }
-            */
+                return npc::theft_witness_compare( lnpc, rnpc );
+            };
+            std::vector<Creature *> witnesses = g->get_creatures_if( sees_stealing );
+            std::sort( witnesses.begin(), witnesses.end(), sort_criteria );
+            for( Creature *c : witnesses ) {
+                const npc *const elem = c->as_npc();
+                if( !elem ) {
+                    // Sorted to have NPCs first
+                    break;
+                }
+                elem->say( "<witnessed_thievery>", 7 );
+            }
             if( !witnesses.empty() ) {
                 set_old_owner( get_owner() );
-                bool guard_chosen = false;
-                for( Creature *witness : witnesses ) {
-                    npc *const elem = witness->as_npc();
-                    if( elem && elem->myclass == NC_BOUNTY_HUNTER ) {
-                        guard_chosen = true;
-                        elem->witness_thievery( &*this );
-                        break;
-                    }
-                }
-                if( !guard_chosen ) {
-                    random_entry( witnesses )->witness_thievery( &*this );
-                }
+                witnesses[0]->witness_thievery( this );
             }
             set_owner( c );
         }

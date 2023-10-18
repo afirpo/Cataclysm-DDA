@@ -1815,7 +1815,7 @@ static hint_rating rate_action_disassemble( avatar &you, const item &it )
 static hint_rating rate_action_view_recipe( avatar &you, const item &it )
 {
     const inventory &inven = you.crafting_inventory();
-    const std::vector<npc *> helpers = you.get_crafting_helpers();
+    const std::vector<Character *> helpers = you.get_crafting_helpers();
     if( it.is_craft() ) {
         const recipe &craft_recipe = it.get_making();
         if( craft_recipe.is_null() || !craft_recipe.ident().is_valid() ) {
@@ -6918,8 +6918,8 @@ void game::zones_manager()
         mgr.cache_avatar_location();
     }
 
-    // get zones on the same z-level, with distance between player and
-    // zone center point <= 50 or all zones, if show_all_zones is true
+    // get zones with distance between player and
+    // zone center point <= 60 or all zones, if show_all_zones is true
     auto get_zones = [&]() {
         std::vector<zone_manager::ref_zone_data> zones;
         if( show_all_zones ) {
@@ -6928,8 +6928,7 @@ void game::zones_manager()
             const tripoint_abs_ms u_abs_pos = u.get_location();
             for( zone_manager::ref_zone_data &ref : mgr.get_zones( zones_faction ) ) {
                 const tripoint_abs_ms &zone_abs_pos = ref.get().get_center_point();
-                if( u_abs_pos.z() == zone_abs_pos.z() &&
-                    rl_dist( u_abs_pos, zone_abs_pos ) <= 50 ) {
+                if( rl_dist( u_abs_pos, zone_abs_pos ) <= ACTIVITY_SEARCH_DISTANCE ) {
                     zones.emplace_back( ref );
                 }
             }
@@ -7514,8 +7513,6 @@ look_around_result game::look_around(
     bool select_zone, bool peeking, bool is_moving_zone, const tripoint &end_point )
 {
     bVMonsterLookFire = false;
-    // TODO: Make this `true`
-    const bool allow_zlev_move = get_option<bool>( "FOV_3D" );
 
     temp_exit_fullscreen();
 
@@ -7735,10 +7732,6 @@ look_around_result game::look_around(
                 ui->mark_resize();
             }
         } else if( action == "LEVEL_UP" || action == "LEVEL_DOWN" ) {
-            if( !allow_zlev_move ) {
-                continue;
-            }
-
             const int dz = action == "LEVEL_UP" ? 1 : -1;
             lz = clamp( lz + dz, min_levz, max_levz - 1 );
             center.z = clamp( center.z + dz, min_levz, max_levz - 1 );
@@ -9658,7 +9651,7 @@ void game::butcher()
         }
         return;
     }
-    const std::vector<npc *> helpers = u.get_crafting_helpers();
+    const std::vector<Character *> helpers = u.get_crafting_helpers();
     for( std::size_t i = 0; i < helpers.size() && i < 3; i++ ) {
         add_msg( m_info, _( "%s helps with this task…" ), helpers[i]->get_name() );
     }
@@ -12922,6 +12915,22 @@ std::vector<Creature *> game::get_creatures_if( const std::function<bool( const 
     for( Creature &critter : all_creatures() ) {
         if( pred( critter ) ) {
             result.push_back( &critter );
+        }
+    }
+    return result;
+}
+
+std::vector<Character *> game::get_characters_if( const std::function<bool( const Character & )>
+        &pred )
+{
+    std::vector<Character *> result;
+    avatar &a = get_avatar();
+    if( pred( a ) ) {
+        result.push_back( &a );
+    }
+    for( npc &guy : all_npcs() ) {
+        if( pred( guy ) ) {
+            result.push_back( &guy );
         }
     }
     return result;
