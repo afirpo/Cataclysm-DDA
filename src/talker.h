@@ -328,6 +328,9 @@ class talker
         virtual bool can_see() const {
             return false;
         }
+        virtual bool can_see_location( const tripoint & ) const {
+            return false;
+        }
         virtual bool is_mute() const {
             return false;
         }
@@ -472,6 +475,9 @@ class talker
         virtual std::string evaluation_by( const talker & ) const {
             return "";
         }
+        virtual std::string view_personality_traits() const {
+            return "";
+        }
         virtual std::string short_description() const {
             return "";
         }
@@ -554,6 +560,12 @@ class talker
             return 0;
         }
         virtual double armor_at( damage_type_id &, bodypart_id & ) const {
+            return 0;
+        }
+        virtual int coverage_at( bodypart_id & ) const {
+            return 0;
+        }
+        virtual int encumbrance_at( bodypart_id & ) const {
             return 0;
         }
         virtual bool worn_with_flag( const flag_id &, const bodypart_id & ) const {

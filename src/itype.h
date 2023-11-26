@@ -662,8 +662,10 @@ struct itype_variant_data {
     std::optional<nc_color> alt_color = std::nullopt;
 
     bool append = false; // if the description should be appended to the base description.
+    // Expand the description when generated and save it on the item
+    bool expand_snippets = false;
 
-    int weight = 0;
+    int weight = 1;
 
     void deserialize( const JsonObject &jo );
     void load( const JsonObject &jo );
@@ -890,8 +892,10 @@ struct islot_gunmod : common_ranged_data {
     std::map<gunmod_location, int> add_mod;
 
     /** Not compatible on weapons that have this mod slot */
-    std::set<gunmod_location> blacklist_mod;
+    std::set<gunmod_location> blacklist_slot;
 
+    /** Not compatible on weapons that have these mods */
+    std::set<itype_id> blacklist_mod;
     // hard coded barrel length from this mod
     units::length barrel_length = 0_mm;
 
@@ -1395,7 +1399,7 @@ struct itype {
 
     public:
         /** Damage output in melee for zero or more damage types */
-        std::map<damage_type_id, float> melee;
+        std::unordered_map<damage_type_id, float> melee;
 
         bool default_container_sealed = true;
 
@@ -1405,12 +1409,15 @@ struct itype {
         // used for generic_factory for copy-from
         bool was_loaded = false;
 
+        // Expand snippets in the description and save the description on the object
+        bool expand_snippets = false;
+
     private:
         // load-only, for applying proportional melee values at load time
-        std::map<damage_type_id, float> melee_proportional;
+        std::unordered_map<damage_type_id, float> melee_proportional;
 
         // load-only, for applying relative melee values at load time
-        std::map<damage_type_id, float> melee_relative;
+        std::unordered_map<damage_type_id, float> melee_relative;
 
         /** Can item be combined with other identical items? */
         bool stackable_ = false;

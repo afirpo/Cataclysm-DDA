@@ -674,6 +674,16 @@ double talker_character_const::armor_at( damage_type_id &dt, bodypart_id &bp ) c
     return me_chr_const->worn.damage_resist( dt, bp );
 }
 
+int talker_character_const::coverage_at( bodypart_id &id ) const
+{
+    return me_chr_const->worn.get_coverage( id );
+}
+
+int talker_character_const::encumbrance_at( bodypart_id &id ) const
+{
+    return me_chr_const->encumb( id );
+}
+
 void talker_character::mod_pain( int amount )
 {
     me_chr->mod_pain( amount );
@@ -745,6 +755,11 @@ bool talker_character_const::can_see() const
 {
     return !me_chr_const->is_blind() && ( !me_chr_const->in_sleep_state() ||
                                           me_chr_const->has_flag( json_flag_SEESLEEP ) );
+}
+
+bool talker_character_const::can_see_location( const tripoint &pos ) const
+{
+    return me_chr_const->sees( pos );
 }
 
 void talker_character::set_fatigue( int amount )
