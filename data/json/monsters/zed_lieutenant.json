@@ -320,7 +320,7 @@
     "run_for_npcs": false,
     "condition": { "and": [ { "days_since_cataclysm": 7 }, { "math": [ "Lieutenants_active", "<", "1" ] } ] },
     "//2": "Integer value instead of bool, so more can be added later and use math for conditions",
-    "effect": [ { "math": [ "Lieutenants_active", "=", "1" ] }, { "math": [ "culo", "=", "1" ] } ],
+    "effect": [ { "math": [ "Lieutenants_active", "=", "1" ] }, { "math": [ "Shadow_Lurking", "=", "1" ] } ],
     "deactivate_condition": { "math": [ "Lieutenants_active", ">=", "1" ] }
   },
   {
