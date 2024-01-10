@@ -164,6 +164,8 @@ armeniaca
 armet
 armguard
 armguards
+armhole
+armholes
 armorers
 armrests
 aromantic
@@ -1778,6 +1780,7 @@ macronutrient
 macrophenotypic
 macuahuitl
 maculata
+magicks
 magickal
 magwells
 maiasaura
