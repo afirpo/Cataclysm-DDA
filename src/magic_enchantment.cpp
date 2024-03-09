@@ -68,6 +68,7 @@ namespace io
             case enchant_vals::mod::BIONIC_POWER: return "BIONIC_POWER";
             case enchant_vals::mod::MAX_STAMINA: return "MAX_STAMINA";
             case enchant_vals::mod::REGEN_STAMINA: return "REGEN_STAMINA";
+            case enchant_vals::mod::CARDIO_MULTIPLIER: return "CARDIO_MULTIPLIER";
             case enchant_vals::mod::MAX_HP: return "MAX_HP";
             case enchant_vals::mod::REGEN_HP: return "REGEN_HP";
             case enchant_vals::mod::HUNGER: return "HUNGER";
@@ -113,6 +114,7 @@ namespace io
             case enchant_vals::mod::STOMACH_SIZE_MULTIPLIER: return "STOMACH_SIZE_MULTIPLIER";
             case enchant_vals::mod::LEARNING_FOCUS: return "LEARNING_FOCUS";
             case enchant_vals::mod::RECOIL_MODIFIER: return "RECOIL_MODIFIER";
+            case enchant_vals::mod::ARMOR_ALL: return "ARMOR_ALL";
             case enchant_vals::mod::ARMOR_ACID: return "ARMOR_ACID";
             case enchant_vals::mod::ARMOR_BASH: return "ARMOR_BASH";
             case enchant_vals::mod::ARMOR_BIO: return "ARMOR_BIO";
@@ -163,6 +165,18 @@ namespace io
             case enchant_vals::mod::OVERKILL_DAMAGE: return "OVERKILL_DAMAGE";
             case enchant_vals::mod::RANGE: return "RANGE";
             case enchant_vals::mod::AVOID_FRIENDRY_FIRE: return "AVOID_FRIENDRY_FIRE";
+            case enchant_vals::mod::MOVECOST_SWIM_MOD: return "MOVECOST_SWIM_MOD";
+            case enchant_vals::mod::MOVECOST_OBSTACLE_MOD: return "MOVECOST_OBSTACLE_MOD";
+            case enchant_vals::mod::MOVECOST_FLATGROUND_MOD: return "MOVECOST_FLATGROUND_MOD";
+            case enchant_vals::mod::SHOUT_NOISE_BASE: return "SHOUT_NOISE_BASE";
+            case enchant_vals::mod::SHOUT_NOISE_STR_MULT: return "SHOUT_NOISE_STR_MULT";
+            case enchant_vals::mod::NIGHT_VIS: return "NIGHT_VIS";
+            case enchant_vals::mod::HEARING_MULT: return "HEARING_MULT";
+            case enchant_vals::mod::BANDAGE_BONUS: return "BANDAGE_BONUS";
+            case enchant_vals::mod::DISINFECTANT_BONUS: return "DISINFECTANT_BONUS";
+            case enchant_vals::mod::BLEED_STOP_BONUS: return "BLEED_STOP_BONUS";
+            case enchant_vals::mod::UGLINESS: return "UGLINESS";
+            case enchant_vals::mod::VOMIT_MUL: return "VOMIT_MUL";
             case enchant_vals::mod::NUM_MOD: break;
         }
         cata_fatal( "Invalid enchant_vals::mod" );
@@ -281,6 +295,7 @@ bool enchantment::is_monster_relevant() const
     for( const std::pair<const enchant_vals::mod, dbl_or_var> &pair_values :
          values_add ) {
         if( pair_values.first == enchant_vals::mod::ARMOR_ACID ||
+            pair_values.first == enchant_vals::mod::ARMOR_ALL ||
             pair_values.first == enchant_vals::mod::ARMOR_BASH ||
             pair_values.first == enchant_vals::mod::ARMOR_BIO ||
             pair_values.first == enchant_vals::mod::ARMOR_BULLET ||
@@ -299,6 +314,7 @@ bool enchantment::is_monster_relevant() const
     for( const std::pair<const enchant_vals::mod, dbl_or_var> &pair_values :
          values_multiply ) {
         if( pair_values.first == enchant_vals::mod::ARMOR_ACID ||
+            pair_values.first == enchant_vals::mod::ARMOR_ALL ||
             pair_values.first == enchant_vals::mod::ARMOR_BASH ||
             pair_values.first == enchant_vals::mod::ARMOR_BIO ||
             pair_values.first == enchant_vals::mod::ARMOR_BULLET ||

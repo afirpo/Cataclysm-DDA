@@ -1,3 +1,4 @@
+#if !defined(__ANDROID__)
 #pragma once
 #include <string>
 #include <vector>
@@ -91,6 +92,7 @@ class window
         void mark_resized();
 
     protected:
+        bool force_to_back = false;
         bool is_open;
         std::string id;
         int window_flags;
@@ -105,3 +107,4 @@ void load_colors();
 #endif
 
 } // namespace cataimgui
+#endif // #if defined(__ANDROID)

@@ -221,31 +221,7 @@ struct mutation_branch {
         std::optional<float> healing_multiplier = std::nullopt;
         // Limb mending bonus
         std::optional<float> mending_modifier = std::nullopt;
-        std::optional<float> pain_modifier = std::nullopt;
-        // Bonus HP multiplier. That is, 1.0 doubles hp, -0.5 halves it.
-        std::optional<float> hp_modifier = std::nullopt;
-        // Second HP modifier that stacks with first but is otherwise identical.
-        std::optional<float> hp_modifier_secondary = std::nullopt;
-        // Flat bonus/penalty to hp.
-        std::optional<float> hp_adjustment = std::nullopt;
-        // Modify strength stat without changing HP
-        std::optional<float> str_modifier = std::nullopt;
-        //melee bonuses
-        int cut_dmg_bonus = 0;
-        float pierce_dmg_bonus = 0.0f;
-        std::pair<int, int> rand_cut_bonus;
-        int bash_dmg_bonus = 0;
-        std::pair<int, int> rand_bash_bonus;
         // Additional bonuses
-        std::optional<float> dodge_modifier = std::nullopt;
-        std::optional<float> movecost_modifier = std::nullopt;
-        std::optional<float> movecost_flatground_modifier = std::nullopt;
-        std::optional<float> movecost_obstacle_modifier = std::nullopt;
-        std::optional<float> attackcost_modifier = std::nullopt;
-        std::optional<float> cardio_multiplier = std::nullopt;
-        std::optional<float> weight_capacity_modifier = std::nullopt;
-        std::optional<float> hearing_modifier = std::nullopt;
-        std::optional<float> movecost_swim_modifier = std::nullopt;
         std::optional<float> noise_modifier = std::nullopt;
         float scent_modifier = 1.0f;
         std::optional<int> scent_intensity;
@@ -281,13 +257,8 @@ struct mutation_branch {
 
         std::optional<float> crafting_speed_multiplier = std::nullopt;
 
-        // Subtracted from the range at which monsters see player, corresponding to percentage of change. Clamped to +/- 60 for effectiveness
-        std::optional<float> stealth_modifier = std::nullopt;
-
         // Speed lowers--or raises--for every X F (X C) degrees below or above 65 F (18.3 C)
         std::optional<float> temperature_speed_modifier = std::nullopt;
-        // Extra metabolism rate multiplier. 1.0 doubles usage, -0.5 halves.
-        std::optional<float> metabolism_modifier = std::nullopt;
         // As above but for thirst.
         std::optional<float> thirst_modifier = std::nullopt;
         // As above but for fatigue.
@@ -296,10 +267,6 @@ struct mutation_branch {
         std::optional<float> fatigue_regen_modifier = std::nullopt;
         // Modifier for the rate at which stamina regenerates.
         std::optional<float> stamina_regen_modifier = std::nullopt;
-        // the modifier for obtaining an item from a container as a handling penalty
-        std::optional<float> obtain_cost_multiplier = std::nullopt;
-        // the modifier for the stomach size
-        std::optional<float> stomach_size_multiplier = std::nullopt;
         // the modifier for the vomit chance
         std::optional<float> vomit_multiplier = std::nullopt;
         // the modifier for sweat amount
@@ -370,6 +337,17 @@ struct mutation_branch {
         std::vector<effect_on_condition_id> deactivated_eocs;
         /** mutation enchantments */
         std::vector<enchantment_id> enchantments;
+
+        struct OverrideLook {
+            std::string id;
+            std::string tile_category;
+            OverrideLook( const std::string &_id, const std::string &_tile_category )
+                : id( _id ), tile_category( _tile_category ) {}
+        };
+        /** ID, tile category, and variant
+        This will make the player appear as another entity (such as a non-humanoid creature).
+        The texture will override all other textures, including the character's body. */
+        std::optional<OverrideLook> override_look;
     private:
         translation raw_spawn_item_message;
     public:
