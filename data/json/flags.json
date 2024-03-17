@@ -2382,11 +2382,6 @@
     "//": "This corpse is from a monster with the CRITTER_UNDERFED flag."
   },
   {
-    "id": "TRANSPARENT",
-    "type": "json_flag",
-    "info": "This is transparent and <info>won't block light</info> from hitting the wearer."
-  },
-  {
     "id": "UNRESTRICTED",
     "type": "json_flag",
     "//": "Ignores 'restricts' in mutation jsons.  Only for baggy, draped, adjustable, strapped etc items.",
@@ -2456,11 +2451,6 @@
     "id": "LIXA_MILITARY_CARD",
     "type": "json_flag",
     "info": "This grants access to locked-down areas of the LIXA facility."
-  },
-  {
-    "id": "BILE_AFFLICTED",
-    "type": "json_flag",
-    "//": "The character is afflicted with boomer bile."
   },
   {
     "id": "DRACULIN_VENOM",
