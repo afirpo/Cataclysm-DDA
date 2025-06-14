@@ -258,7 +258,10 @@ void remove_bag_from( monster &z )
     std::string pet_name = z.get_name();
     if( z.storage_item ) {
         if( !z.inv.empty() ) {
-            dump_items( z );
+            for ( item &it : z.inv ) {
+                z.storage_item->force_insert_item( it, pocket_type::CONTAINER );
+            }
+            z.inv.clear();
         }
         Character &player_character = get_player_character();
         get_map().add_item_or_charges( player_character.pos_bub(), *z.storage_item );
