@@ -417,8 +417,6 @@
       { "u_lose_morale": "morale_pyromania_startfire" },
       { "u_lose_morale": "morale_pyromania_nearfire" },
       { "u_lose_morale": "morale_pyromania_nofire" },
-      { "u_lose_morale": "morale_killer_has_killed" },
-      { "u_lose_morale": "morale_killer_need_to_kill" },
       { "u_lose_morale": "morale_perm_filthy" },
       { "u_lose_morale": "morale_butcher" },
       { "u_lose_morale": "morale_gravedigger" },
@@ -441,7 +439,8 @@
       { "u_lose_morale": "morale_broke_fae_ban" },
       { "u_lose_morale": "morale_homullus_self_deception" },
       { "u_lose_morale": "morale_ierde_meditation" },
-      { "u_lose_morale": "morale_boring_fruit" }
+      { "u_lose_morale": "morale_boring_fruit" },
+      { "u_lose_morale": "morale_vw_no_fun" }
     ]
   },
   {
