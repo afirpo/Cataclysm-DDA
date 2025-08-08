@@ -148,6 +148,8 @@ static const itype_id itype_syringe( "syringe" );
 
 static const json_character_flag json_flag_BIONIC_LIMB( "BIONIC_LIMB" );
 static const json_character_flag json_flag_MANUAL_CBM_INSTALLATION( "MANUAL_CBM_INSTALLATION" );
+static const json_character_flag
+json_flag_TEMPORARY_SHAPESHIFT_NO_HANDS( "TEMPORARY_SHAPESHIFT_NO_HANDS" );
 
 static const morale_type morale_pyromania_nofire( "morale_pyromania_nofire" );
 static const morale_type morale_pyromania_startfire( "morale_pyromania_startfire" );
@@ -2366,7 +2368,7 @@ std::optional<int> fireweapon_on_actor::use( Character *p, item &it,
         p->add_msg_if_player( "%s", noise_message );
     }
 
-    return 1;
+    return 0;
 }
 
 void manualnoise_actor::load( const JsonObject &obj, const std::string & )
@@ -3099,6 +3101,15 @@ bool repair_item_actor::can_use_tool( const Character &p, const item &tool, bool
     if( p.cant_do_underwater( print_msg ) ) {
         return false;
     }
+    if( p.has_flag( json_flag_TEMPORARY_SHAPESHIFT_NO_HANDS ) ) {
+        if( print_msg ) {
+            p.add_msg_player_or_npc( m_bad, _( "You don't have proper hands to do that." ),
+                                     _( "<npcname> doesn't have proper hands to do that." ) );
+        }
+        return false;
+
+    }
+
     if( p.cant_do_mounted( print_msg ) ) {
         return false;
     }
@@ -6083,6 +6094,7 @@ std::unique_ptr<iuse_actor> effect_on_conditions_actor::clone() const
 
 void effect_on_conditions_actor::load( const JsonObject &obj, const std::string &src )
 {
+    optional( obj, false, "consume", consume, false );
     obj.read( "description", description );
     obj.read( "menu_text", menu_text );
     need_worn = obj.get_bool( "need_worn", false );
@@ -6154,8 +6166,11 @@ std::optional<int> effect_on_conditions_actor::use( Character *p, item &it,
     // it will not properly decrement any item of type `comestible` if consumed via the `E` `Consume item` menu.
     // Therefore, it is not advised to use items of type `comestible` with a `use_action` of type
     // `effect_on_conditions` until/unless this section is properly updated to actually consume said item.
-    if( p && !p->has_item( it ) ) {
-        return 0;
+    if( consume ) {
+        if( p && !p->has_item( it ) ) {
+            return 0;
+        }
+        return 1;
     }
-    return 1;
+    return 0;
 }

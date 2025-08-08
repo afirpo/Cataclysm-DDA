@@ -619,7 +619,8 @@
       { "group": "molle_backpacks_and_accessories", "prob": 15 },
       { "item": "heatpack", "prob": 30 },
       { "item": "sleeping_bag_roll", "prob": 20 },
-      { "item": "duffelbag", "prob": 25 },
+      { "item": "duffelbag", "prob": 15 },
+      { "item": "seabag", "prob": 10 },
       { "item": "mess_kit", "prob": 50 },
       { "item": "flashlight", "prob": 50, "charges": [ 0, 300 ] },
       { "item": "heavy_flashlight", "prob": 10, "charges": [ 0, 300 ] },
@@ -692,7 +693,8 @@
       { "item": "instant_coffee", "prob": 25 },
       { "item": "con_milk", "prob": 10 },
       { "item": "milk_UHT", "prob": 25 },
-      { "prob": 20, "group": "cereal_box_small_4" },
+      { "prob": 20, "group": "box_cereal2" },
+      { "prob": 20, "group": "box_cereal3" },
       { "item": "sports_drink", "prob": 40 },
       { "item": "water_clean", "prob": 90 }
     ]

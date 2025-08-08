@@ -16,7 +16,6 @@
 #include <vector>
 
 #include "addiction.h"
-#include "assign.h"
 #include "avatar.h"
 #include "bodypart.h"
 #include "calendar.h"
@@ -45,7 +44,6 @@
 #include "iuse.h"
 #include "iuse_actor.h"
 #include "magic_enchantment.h"
-#include "make_static.h"
 #include "map.h"
 #include "math_parser_diag_value.h"
 #include "messages.h"
@@ -73,6 +71,11 @@
 
 static const std::string comesttype_DRINK( "DRINK" );
 static const std::string comesttype_FOOD( "FOOD" );
+
+static const addiction_id addiction_amphetamine( "amphetamine" );
+static const addiction_id addiction_caffeine( "caffeine" );
+static const addiction_id addiction_cocaine( "cocaine" );
+static const addiction_id addiction_crack( "crack" );
 
 static const bionic_id bio_faulty_grossfood( "bio_faulty_grossfood" );
 static const bionic_id bio_syringe( "bio_syringe" );
@@ -126,6 +129,7 @@ static const json_character_flag json_flag_PRED3( "PRED3" );
 static const json_character_flag json_flag_PRED4( "PRED4" );
 static const json_character_flag json_flag_PSYCHOPATH( "PSYCHOPATH" );
 static const json_character_flag json_flag_SAPIOVORE( "SAPIOVORE" );
+static const json_character_flag json_flag_SKIP_HEALTH( "SKIP_HEALTH" );
 static const json_character_flag json_flag_SPIRITUAL( "SPIRITUAL" );
 static const json_character_flag json_flag_STRICT_HUMANITARIAN( "STRICT_HUMANITARIAN" );
 
@@ -761,7 +765,7 @@ float Character::metabolic_rate_base() const
     float hunger_rate = get_option< float >( hunger_rate_string );
     const float final_hunger_rate = enchantment_cache->modify_value( enchant_vals::mod::METABOLISM,
                                     hunger_rate );
-    return std::clamp( final_hunger_rate, 0.0f, float_max );
+    return std::clamp( final_hunger_rate, 0.0f, std::numeric_limits<float>::max() );
 }
 
 // TODO: Make this less chaotic to let NPC retroactive catch up work here
@@ -1291,10 +1295,10 @@ void Character::modify_stimulation( const islot_comestible &comest )
                 -1 ) );
     }
     if( has_trait( trait_STIMBOOST ) && ( current_stim > 30 ) &&
-        ( comest.addictions.count( STATIC( addiction_id( "caffeine" ) ) ) ||
-          comest.addictions.count( STATIC( addiction_id( "amphetamine" ) ) ) ||
-          comest.addictions.count( STATIC( addiction_id( "cocaine" ) ) ) ||
-          comest.addictions.count( STATIC( addiction_id( "crack" ) ) ) ) ) {
+        ( comest.addictions.count( addiction_caffeine ) ||
+          comest.addictions.count( addiction_amphetamine ) ||
+          comest.addictions.count( addiction_cocaine ) ||
+          comest.addictions.count( addiction_crack ) ) ) {
         int hallu_duration = ( current_stim - comest.stim < 30 ) ? current_stim - 30 : comest.stim;
         add_effect( effect_visuals, hallu_duration * 30_minutes );
         add_msg_if_player( m_bad, SNIPPET.random_from_category( "comest_stimulant" ).value_or(
@@ -1622,7 +1626,7 @@ bool Character::consume_effects( item &food )
 
     // Used in hibernation messages.
     const int nutr = nutrition_for( food );
-    const bool skip_health = has_trait( trait_PROJUNK2 ) && comest.healthy < 0;
+    const bool skip_health = has_flag( json_flag_SKIP_HEALTH ) && comest.healthy < 0;
     // We can handle junk just fine
     if( !skip_health ) {
         modify_health( comest );
@@ -1716,7 +1720,9 @@ bool Character::consume_effects( item &food )
 
     if( ingested.water < 0_ml ) {
         mod_thirst( -units::to_milliliter( ingested.water ) / 5 );
-        add_msg_if_player( m_bad, _( "You feel thirstier than before you consumed that!" ) );
+        if( comest.quench < -15 ) {
+            add_msg_if_player( m_bad, _( "You feel thirstier than before you consumed that!" ) );
+        }
     }
 
     // update speculative values

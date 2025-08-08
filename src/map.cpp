@@ -149,6 +149,7 @@ static const furn_str_id furn_f_rubble( "f_rubble" );
 static const furn_str_id furn_f_rubble_rock( "f_rubble_rock" );
 static const furn_str_id furn_f_wreckage( "f_wreckage" );
 
+static const item_group_id Item_spawn_data_EMPTY_GROUP( "EMPTY_GROUP" );
 static const item_group_id Item_spawn_data_default_zombie_clothes( "default_zombie_clothes" );
 static const item_group_id Item_spawn_data_default_zombie_items( "default_zombie_items" );
 
@@ -163,6 +164,8 @@ static const itype_id itype_steel_chunk( "steel_chunk" );
 static const itype_id itype_wire( "wire" );
 
 static const json_character_flag json_flag_ONE_STORY_FALL( "ONE_STORY_FALL" );
+static const json_character_flag
+json_flag_TEMPORARY_SHAPESHIFT_NO_HANDS( "TEMPORARY_SHAPESHIFT_NO_HANDS" );
 static const json_character_flag json_flag_WALL_CLING( "WALL_CLING" );
 
 static const material_id material_glass( "glass" );
@@ -1272,6 +1275,10 @@ std::set<tripoint_bub_ms> map::get_moving_vehicle_targets( const Creature &z, in
         if( !v.v->is_moving() ) {
             continue;
         }
+        if( v.v->get_driver( *this ) != nullptr &&
+            z.attitude_to( *v.v->get_driver( *this ) ) != Creature::Attitude::HOSTILE ) {
+            continue;
+        }
         if( std::abs( v.pos.z() - zpos.z() ) > fov_3d_z_range ) {
             continue;
         }
@@ -1397,8 +1404,9 @@ void map::board_vehicle( const tripoint_bub_ms &pos, Character *p )
     }
     if( vp->part().has_flag( vp_flag::passenger_flag ) ) {
         Character *psg = vp->vehicle().get_passenger( vp->part_index() );
-        debugmsg( "map::board_vehicle: passenger (%s) is already there",
-                  psg ? psg->get_name() : "<null>" );
+        debugmsg( "map::board_vehicle: %s failed to board passenger (%s) is already there",
+                  p ? p->get_name() : "<null_boarder>",
+                  psg ? psg->get_name() : "<null_passenger>" );
         unboard_vehicle( pos );
     }
     vp->part().set_flag( vp_flag::passenger_flag );
@@ -4129,6 +4137,11 @@ void map::bash_ter_furn( const tripoint_bub_ms &p, bash_params &params, bool rep
         // Didn't find any tent center, wreck the current tile
         if( !tentp ) {
             if( bash ) {
+                if( smash_ter ) {
+                    drop_bash_results( terid, p );
+                } else {
+                    drop_bash_results( furnid, p );
+                }
                 spawn_items( p, item_group::items_from( bash->drop_group, calendar::turn ) );
                 furn_set( p, furn_bash.furn_set );
             }
@@ -4199,7 +4212,11 @@ void map::bash_ter_furn( const tripoint_bub_ms &p, bash_params &params, bool rep
     }
 
     if( !tent ) {
-        spawn_items( p, item_group::items_from( bash->drop_group, calendar::turn ) );
+        if( smash_ter ) {
+            drop_bash_results( terid, p );
+        } else {
+            drop_bash_results( furnid, p );
+        }
     }
     //regenerates roofs for tiles that should be walkable from above
     if( zlevels && smash_ter && !set_to_air && ter( p )->has_flag( "EMPTY_SPACE" ) &&
@@ -4331,6 +4348,94 @@ void map::bash_field( const tripoint_bub_ms &p, bash_params &params )
     }
     for( field_type_id fd : to_remove ) {
         remove_field( p, fd );
+    }
+}
+
+void map::drop_bash_results( const map_data_common_t &ter_furn, const tripoint_bub_ms &p )
+{
+    auto spawn_items_or_charges = []( map & here, const tripoint_bub_ms & p, const itype_id it,
+    const int qty ) {
+        // there seems to be some way to replace it with add_item_or_charges()
+        // but it results in charges spawned in dumb ways, so i dropped it
+        if( it->count_by_charges() ) {
+            here.spawn_item( p, it, 1, qty );
+        } else {
+            here.spawn_item( p, it, qty );
+        }
+    };
+
+    auto drop_components_or_subcomponents = [spawn_items_or_charges](
+    const std::vector<std::pair<itype_id, int>> &it_qty_v, const tripoint_bub_ms & p )->void {
+
+        map &here = get_map();
+
+        if( it_qty_v.empty() )
+        {
+            return;
+        }
+
+        add_msg_debug( debugmode::DF_MAP, "drop_bash_results():" );
+
+        for( const std::pair<itype_id, int> &it_qty : it_qty_v )
+        {
+            const std::vector<item_comp> sub_uncraft_components = item( it_qty.first ).get_uncraft_components();
+
+            if( sub_uncraft_components.empty() ) {
+                // if no subcomponents, just straight drop 100% of item count
+                spawn_items_or_charges( here, p, it_qty.first->id, it_qty.second );
+                add_msg_debug( debugmode::DF_MAP, "type 1, plain item: %s, %s pcs.",
+                               it_qty.first->id.c_str(), it_qty.second );
+            } else {
+                // if subcomponents, drop a bit of subcomponents and a bit of components
+                const float broken_qty = rng_float( 0.1f, 0.4f );
+                for( const item_comp &sub_comp : sub_uncraft_components ) {
+                    const int qty_or_charges_comp =  sub_comp.count * std::round( it_qty.second * broken_qty );
+                    spawn_items_or_charges( here, p, sub_comp.type, qty_or_charges_comp );
+                    add_msg_debug( debugmode::DF_MAP, "type 2, subcomponent: %s, %s pcs.",
+                                   sub_comp.type->id.c_str(), qty_or_charges_comp );
+                }
+                const int qty_or_charges = std::round( it_qty.second * ( 1 - broken_qty ) );
+                spawn_items_or_charges( here, p, it_qty.first->id, qty_or_charges );
+                add_msg_debug( debugmode::DF_MAP, "type 3, component: %s, %s pcs.",
+                               it_qty.first->id.c_str(), qty_or_charges ) ;
+            }
+        }
+    };
+
+    // todo: do the same component recursive loop for generic salvaging
+    if( !ter_furn.base_item.is_null() ) {
+        // if has underlying item, take it's uncraft components as bash result
+
+        std::vector<std::pair<itype_id, int>> it_qty_v;
+        it_qty_v.reserve( ter_furn.get_uncraft_components().size() );
+        for( const item_comp &comp : ter_furn.get_uncraft_components() ) {
+            it_qty_v.emplace_back( comp.type, comp.count );
+        }
+        drop_components_or_subcomponents( it_qty_v, p );
+    } else {
+        if( ter_furn.bash_info().has_value() ) {
+            if( ter_furn.bash_info().value().drop_group == Item_spawn_data_EMPTY_GROUP
+                && ter_furn.deconstruct_info().has_value()
+                && ter_furn.deconstruct_info().value().drop_group != Item_spawn_data_EMPTY_GROUP ) {
+                // if drop_group is not defined manually, and we have deconstruct group
+                // then pick deconstruct group as a base, break it a bit, and then drop it.
+
+                const std::map<const itype *, std::pair<int, int>> every_item = item_group::spawn_data_from_group(
+                            ter_furn.deconstruct_info().value().drop_group )->every_item_min_max();
+                std::vector<std::pair<itype_id, int>> it_qty_v;
+
+                it_qty_v.reserve( every_item.size() );
+                for( const std::pair<const itype *, std::pair<int, int>> item_instance : every_item ) {
+                    it_qty_v.emplace_back( item_instance.first->id, rng( item_instance.second.first,
+                                           item_instance.second.second ) );
+                }
+                drop_components_or_subcomponents( it_qty_v, p );
+            } else {
+                map &here = get_map();
+                here.spawn_items( p, item_group::items_from( ter_furn.bash_info().value().drop_group,
+                                  calendar::turn ) );
+            }
+        }
     }
 }
 
@@ -4652,9 +4757,11 @@ bool map::hit_with_fire( const tripoint_bub_ms &p )
 bool map::open_door( Creature const &u, const tripoint_bub_ms &p, const bool inside,
                      const bool check_only )
 {
-    if( u.has_effect( effect_incorporeal ) || impassable_field_at( p ) ) {
+    if( u.has_effect( effect_incorporeal ) || impassable_field_at( p ) ||
+        u.has_flag( json_flag_TEMPORARY_SHAPESHIFT_NO_HANDS ) ) {
         return false;
     }
+
     const ter_t &ter = this->ter( p ).obj();
     const furn_t &furn = this->furn( p ).obj();
     if( ter.open ) {

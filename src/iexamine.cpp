@@ -56,7 +56,6 @@
 #include "iuse_actor.h"
 #include "magic.h"
 #include "magic_teleporter_list.h"
-#include "make_static.h"
 #include "map.h"
 #include "map_iterator.h"
 #include "map_scale_constants.h"
@@ -108,6 +107,8 @@ static const activity_id ACT_HARVEST( "ACT_HARVEST" );
 static const activity_id ACT_OPERATION( "ACT_OPERATION" );
 static const activity_id ACT_PLANT_SEED( "ACT_PLANT_SEED" );
 
+static const addiction_id addiction_opiate( "opiate" );
+
 static const ammotype ammo_money( "money" );
 
 static const bionic_id bio_lighter( "bio_lighter" );
@@ -117,6 +118,8 @@ static const bionic_id bio_painkiller( "bio_painkiller" );
 static const character_modifier_id character_modifier_obstacle_climb_mod( "obstacle_climb_mod" );
 
 static const climbing_aid_id climbing_aid_furn_CLIMBABLE( "furn_CLIMBABLE" );
+
+static const damage_type_id damage_bash( "bash" );
 
 static const efftype_id effect_antibiotic( "antibiotic" );
 static const efftype_id effect_bite( "bite" );
@@ -213,6 +216,8 @@ static const json_character_flag json_flag_GLIDE( "GLIDE" );
 static const json_character_flag json_flag_LEVITATION( "LEVITATION" );
 static const json_character_flag json_flag_PAIN_IMMUNE( "PAIN_IMMUNE" );
 static const json_character_flag json_flag_SAFECRACK_NO_TOOL( "SAFECRACK_NO_TOOL" );
+static const json_character_flag
+json_flag_TEMPORARY_SHAPESHIFT_NO_HANDS( "TEMPORARY_SHAPESHIFT_NO_HANDS" );
 static const json_character_flag json_flag_WING_ARM( "WING_ARM" );
 static const json_character_flag json_flag_WING_GLIDE( "WING_GLIDE" );
 
@@ -306,6 +311,8 @@ static const trait_id trait_BEAK_HUM( "BEAK_HUM" );
 static const trait_id trait_BURROW( "BURROW" );
 static const trait_id trait_BURROWLARGE( "BURROWLARGE" );
 static const trait_id trait_DEBUG_HS( "DEBUG_HS" );
+static const trait_id trait_ESPER_ADVANCEMENT_OKAY( "ESPER_ADVANCEMENT_OKAY" );
+static const trait_id trait_ESPER_STARTER_ADVANCEMENT_OKAY( "ESPER_STARTER_ADVANCEMENT_OKAY" );
 static const trait_id trait_ILLITERATE( "ILLITERATE" );
 static const trait_id trait_INSECT_ARMS_OK( "INSECT_ARMS_OK" );
 static const trait_id trait_M_DEFENDER( "M_DEFENDER" );
@@ -557,6 +564,14 @@ void iexamine::genemill( Character &you, const tripoint_bub_ms & )
             you.mutate_towards( treatment );
             rc++;
         } while( !you.has_permanent_trait( treatment ) && rc < 10 );
+    }
+
+    // Remove esper potential
+    if( you.has_permanent_trait( trait_ESPER_ADVANCEMENT_OKAY ) ) {
+        you.remove_mutation( trait_ESPER_ADVANCEMENT_OKAY );
+    }
+    if( you.has_permanent_trait( trait_ESPER_STARTER_ADVANCEMENT_OKAY ) ) {
+        you.remove_mutation( trait_ESPER_STARTER_ADVANCEMENT_OKAY );
     }
 
     //Handle Thesholds changing/removal.
@@ -2561,7 +2576,7 @@ void iexamine::flower_poppy( Character &you, const tripoint_bub_ms &examp )
         you.add_effect( effect_pkill2, 7_minutes );
         // Please drink poppy nectar responsibly.
         if( one_in( 20 ) ) {
-            you.add_addiction( STATIC( addiction_id( "opiate" ) ), 1 );
+            you.add_addiction( addiction_opiate, 1 );
         }
     }
     if( !query_yn( _( "Pick %s?" ), here.furnname( examp ) ) ) {
@@ -3790,7 +3805,7 @@ void iexamine::fireplace( Character &you, const tripoint_bub_ms &examp )
         return it.has_flag( flag_FIRESTARTER ) || it.has_flag( flag_FIRE );
     };
     auto is_firequencher = []( const item & it ) {
-        return it.damage_melee( STATIC( damage_type_id( "bash" ) ) );
+        return it.damage_melee( damage_bash );
     };
 
     std::multimap<int, item *> firestarters;
@@ -7634,12 +7649,15 @@ void iexamine::workbench_internal( Character &you, const tripoint_bub_ms &examp,
     const option choice = static_cast<option>( amenu.ret );
     bool in_shell = you.has_active_mutation( trait_SHELL2 ) ||
                     you.has_active_mutation( trait_SHELL3 );
+    bool shapeshift_handless = you.has_flag( json_flag_TEMPORARY_SHAPESHIFT_NO_HANDS );
     switch( choice ) {
         case start_craft: {
             if( in_shell ) {
                 you.add_msg_if_player( m_info, _( "You can't craft while you're in your shell." ) );
             } else if( you.has_effect( effect_incorporeal ) ) {
                 add_msg( m_info, _( "You lack the substance to affect anything." ) );
+            } else if( shapeshift_handless ) {
+                add_msg( m_info, _( "You don't have proper hands to do that." ) );
             } else {
                 you.craft( examp );
             }
@@ -7650,6 +7668,8 @@ void iexamine::workbench_internal( Character &you, const tripoint_bub_ms &examp,
                 you.add_msg_if_player( m_info, _( "You can't craft while you're in your shell." ) );
             } else if( you.has_effect( effect_incorporeal ) ) {
                 add_msg( m_info, _( "You lack the substance to affect anything." ) );
+            } else if( shapeshift_handless ) {
+                add_msg( m_info, _( "You don't have proper hands to do that." ) );
             } else {
                 you.recraft( examp );
             }
@@ -7660,6 +7680,8 @@ void iexamine::workbench_internal( Character &you, const tripoint_bub_ms &examp,
                 you.add_msg_if_player( m_info, _( "You can't craft while you're in your shell." ) );
             } else if( you.has_effect( effect_incorporeal ) ) {
                 add_msg( m_info, _( "You lack the substance to affect anything." ) );
+            } else if( shapeshift_handless ) {
+                add_msg( m_info, _( "You don't have proper hands to do that." ) );
             } else {
                 you.long_craft( examp );
             }
