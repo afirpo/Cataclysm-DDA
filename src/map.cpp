@@ -138,8 +138,12 @@ static const efftype_id effect_weakened_gravity( "weakened_gravity" );
 static const field_type_str_id field_fd_clairvoyant( "fd_clairvoyant" );
 
 static const flag_id json_flag_AVATAR_ONLY( "AVATAR_ONLY" );
+static const flag_id json_flag_DIGGABLE( "DIGGABLE" );
+static const flag_id json_flag_EASY_DECONSTRUCT( "EASY_DECONSTRUCT" );
+static const flag_id json_flag_FLAT( "FLAT" );
 static const flag_id json_flag_JETPACK( "JETPACK" );
 static const flag_id json_flag_LEVITATION( "LEVITATION" );
+static const flag_id json_flag_PLOWABLE( "PLOWABLE" );
 static const flag_id json_flag_PRESERVE_SPAWN_LOC( "PRESERVE_SPAWN_LOC" );
 static const flag_id json_flag_PROXIMITY( "PROXIMITY" );
 static const flag_id json_flag_UNDODGEABLE( "UNDODGEABLE" );
@@ -222,8 +226,6 @@ static const ter_str_id ter_t_window( "t_window" );
 static const ter_str_id ter_t_window_alarm( "t_window_alarm" );
 static const ter_str_id ter_t_window_empty( "t_window_empty" );
 static const ter_str_id ter_t_window_no_curtains( "t_window_no_curtains" );
-
-static const trait_id trait_SCHIZOPHRENIC( "SCHIZOPHRENIC" );
 
 static const trap_str_id tr_unfinished_construction( "tr_unfinished_construction" );
 
@@ -2317,13 +2319,14 @@ std::string map::features( const tripoint_bub_ms &p ) const
     // to take up one line.  So, make sure it does that.
     // FIXME: can't control length of localized text.
     add_if( is_bashable( p ), _( "Smashable." ) );
-    add_if( has_flag( ter_furn_flag::TFLAG_DIGGABLE, p ), _( "Diggable." ) );
-    add_if( has_flag( ter_furn_flag::TFLAG_PLOWABLE, p ), _( "Plowable." ) );
+    add_if( has_flag( ter_furn_flag::TFLAG_DIGGABLE, p ), json_flag_DIGGABLE->name() );
+    add_if( has_flag( ter_furn_flag::TFLAG_PLOWABLE, p ), json_flag_PLOWABLE->name() );
     add_if( has_flag( ter_furn_flag::TFLAG_ROUGH, p ), _( "Rough." ) );
     add_if( has_flag( ter_furn_flag::TFLAG_UNSTABLE, p ), _( "Unstable." ) );
     add_if( has_flag( ter_furn_flag::TFLAG_SHARP, p ), _( "Sharp." ) );
-    add_if( has_flag( ter_furn_flag::TFLAG_FLAT, p ), _( "Flat." ) );
-    add_if( has_flag( ter_furn_flag::TFLAG_EASY_DECONSTRUCT, p ), _( "Simple." ) );
+    add_if( has_flag( ter_furn_flag::TFLAG_FLAT, p ), json_flag_FLAT->name() );
+    add_if( has_flag( ter_furn_flag::TFLAG_EASY_DECONSTRUCT, p ),
+            json_flag_EASY_DECONSTRUCT->name() );
     add_if( has_flag( ter_furn_flag::TFLAG_MOUNTABLE, p ), _( "Mountable." ) );
     add_if( has_flag( ter_furn_flag::TFLAG_FLAMMABLE, p ) ||
             has_flag( ter_furn_flag::TFLAG_FLAMMABLE_ASH, p ) ||
@@ -4774,8 +4777,8 @@ bool map::open_door( Creature const &u, const tripoint_bub_ms &p, const bool ins
                            "open_door", ter.id.str() );
             ter_set( p, ter.open );
 
-            if( u.has_trait( trait_SCHIZOPHRENIC ) && u.is_avatar() &&
-                one_in( 50 ) && !ter.has_flag( ter_furn_flag::TFLAG_TRANSPARENT ) ) {
+            if( u.is_avatar() && u.as_avatar()->schizo_symptoms( 50 ) &&
+                !ter.has_flag( ter_furn_flag::TFLAG_TRANSPARENT ) ) {
                 tripoint_bub_ms mp = p + point_rel_ms( -2 * u.pos_bub().xy().raw() ) + tripoint_rel_ms{ 2 * p.x(), 2 * p.y(), p.z() };
                 g->spawn_hallucination( mp );
             }
@@ -6777,20 +6780,6 @@ computer *map::computer_at( const tripoint_bub_ms &p )
         return nullptr;
     }
     return sm->get_computer( l );
-}
-
-bool map::point_within_camp( const tripoint_abs_ms &point_check ) const
-{
-    const tripoint_abs_omt omt_check( coords::project_to<coords::omt>( point_check ) );
-    const point_abs_omt p = omt_check.xy();
-    for( int x2 = -2; x2 < 2; x2++ ) {
-        for( int y2 = -2; y2 < 2; y2++ ) {
-            if( std::optional<basecamp *> bcp = overmap_buffer.find_camp( p + point( x2, y2 ) ) ) {
-                return ( *bcp )->point_within_camp( omt_check );
-            }
-        }
-    }
-    return false;
 }
 
 void map::remove_submap_camp( const tripoint_bub_ms &p )

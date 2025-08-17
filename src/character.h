@@ -1414,6 +1414,29 @@ class Character : public Creature, public visitable
         bool empathizes_with_species( const species_id &species ) const;
         /** Whether the character feels significant empathy for the given monster.  HUMAN is empathized with by default */
         bool empathizes_with_monster( const mtype_id &monster ) const;
+        /** Whether the character is a pyromaniac who hasn't seen a fire in a while */
+        bool has_unfulfilled_pyromania() const;
+        /** Fulfill the character's pyromaniacal urges */
+        void fulfill_pyromania( int bonus = 15, int max_bonus = 15,
+                                const time_duration &duration = 8_hours, const time_duration &decay_start = 6_hours );
+        /** Fulfill the character's pyromaniacal urges, with a message */
+        void fulfill_pyromania_msg( const std::string &message, int bonus = 15, int max_bonus = 15,
+                                    const time_duration &duration = 8_hours, const time_duration &decay_start = 6_hours );
+        /** Fulfill the character's pyromaniacal urges, with a standard message */
+        void fulfill_pyromania_msg_std( const std::string &target_name = "",
+                                        int bonus = 15, int max_bonus = 15,
+                                        const time_duration &duration = 8_hours, const time_duration &decay_start = 6_hours );
+        /** Fulfill the character's pyromaniacal urges, if they can see the creature on fire */
+        bool fulfill_pyromania_sees( const map &here, const Creature &target,
+                                     int bonus = 15, int max_bonus = 15,
+                                     const time_duration &duration = 8_hours, const time_duration &decay_start = 6_hours );
+        /** Fulfill the character's pyromaniacal urges, if they can see the location on fire */
+        bool fulfill_pyromania_sees( const map &here, const tripoint_bub_ms &target,
+                                     const std::string &target_str = "", bool std_msg = true, int bonus = 15, int max_bonus = 15,
+                                     const time_duration &duration = 8_hours, const time_duration &decay_start = 6_hours );
+
+        /** Whether the character suffers schizophrenic symptoms, with odds 1 in chance */
+        bool schizo_symptoms( int chance = 1 ) const;
 
     private:
         // Cache if character has a flag on their mutations. It is cleared whenever my_mutations is modified.
@@ -2397,9 +2420,11 @@ class Character : public Creature, public visitable
          * Wield an item, unwielding currently wielded item (if any).
          * If moving from a location, use provide item_location instead of item for more accurate move-cost.
          * @param it item to be wielded.
+         * @param obtain_cost value to override move cost calculation
+         * @param combat wielding for combat purposes
          * @return whether both removal and replacement were successful (they are performed atomically)
          */
-        bool wield( item &it, std::optional<int> obtain_cost = std::nullopt );
+        bool wield( item &it, std::optional<int> obtain_cost = std::nullopt, bool combat = true );
         /**
          * Check player capable of unwielding an item.
          * @param it Thing to be unwielded
@@ -2848,6 +2873,8 @@ class Character : public Creature, public visitable
         std::vector<effect_on_condition_id> inactive_effect_on_condition_vector;
         queued_eocs queued_effect_on_conditions;
 
+        /** Queue mutliple EOCs without delay */
+        void queue_effects( const std::vector<effect_on_condition_id> &effects );
         /** Queue an EOC to add effect after a delay */
         void queue_effect( const std::string &name, const time_duration &delay,
                            const time_duration &duration );

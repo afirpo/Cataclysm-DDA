@@ -610,6 +610,13 @@
   },
   {
     "type": "effect_type",
+    "id": "effect_vampire_immune_to_classic_zombification",
+    "//": "Hidden--does nothing in base XE, used for DDotD interactions",
+    "name": [ "" ],
+    "desc": [ "" ]
+  },
+  {
+    "type": "effect_type",
     "id": "effect_dhampir_empowered_blood_indicator",
     "name": [ "Empowered Blood" ],
     "desc": [ "Your blood hums with power, allowing you to access more of your vampiric abilities." ]
@@ -2016,7 +2023,7 @@
     "remove_message": "Your body regains its solidity.",
     "rating": "good",
     "enchantments": [ { "values": [ { "value": "MOVE_COST", "multiply": -0.8 }, { "value": "EVASION", "add": 1 } ] } ],
-    "flags": [ "ETHEREAL", "INVISIBLE", "LEVITATION", "CLIMB_FLYING" ]
+    "flags": [ "ETHEREAL", "INVISIBLE", "LEVITATION", "CLIMB_FLYING", "INHALED_TOXIN_IMMUNE" ]
   },
   {
     "type": "effect_type",

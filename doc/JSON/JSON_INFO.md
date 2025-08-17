@@ -893,7 +893,7 @@ Each turn, the player's addictions are processed using either the given `effect_
     "effect": [
       { "u_add_morale": "morale_craving_marloss", "bonus": -5, "max_bonus": -30 },
       { "u_message": "You daydream about luscious pink berries as big as your fist.", "type": "info" },
-      { "if": { "math": [ "u_val('focus') > 40" ] }, "then": { "math": [ "u_val('focus')", "--" ] } }
+      { "if": { "math": [ "u_val('focus') > 40" ] }, "then": { "math": [ "u_val('focus')--" ] } }
     ]
   },
 ```
@@ -1965,7 +1965,7 @@ The following properties (mandatory, except if noted otherwise) are supported:
     "flags": [ "SCEN_ONLY", "NO_BONUS_ITEMS" ],                // (optional) Array of flags applied to the character, for character creation purposes
     "CBMs": [ "bio_fuel_cell_blood" ],                         // (optional) Array of starting implanted CMBs
     "traits": [ "PROF_CHURL", "ILLITERATE" ],                  // (optional) Array of starting traits/mutations. For further information, see mutations.json and MUTATIONS.md. Note: "trait" is also supported, used for a single trait/mutation ID (legacy!)
-    "requirement": "achievement_survive_28_days",              // (optional) String of an achievement ID required to unlock this profession
+    "requirement": "achievement_survive_28_days",              // (optional) String or Array of String of achievement ID(s) required to unlock this profession
     "hard_requirement": true,                                  // (optional) Defaults false. Whether or not the requirement ignores the metaprogression setting and is always required. Intended for use by mods.
     "effect_on_conditions": [ "scenario_assassin_conv" ],      // (optional) eoc id, inline eoc, or multiple of them, that would run when scenario starts
     "spells": [                                                // (optional) Array of starting spell IDs the character knows upon creation. For further information, see MAGIC.md
@@ -2075,7 +2075,7 @@ The array of hobbies (listed as professions) is whitelisted to all characters.  
 "components": [ [ [ "spear_wood", 4 ], [ "pointy_stick", 4 ] ] ],   // Items used in construction
 "pre_special": [ "check_empty", "check_up_OK" ],                    // Required something that isn't terrain. The syntax also allows for a square bracket enclosed list of specials which all have to be fulfilled
 "pre_terrain": "t_pit",                                             // Alternative to pre_special; Required terrain to build on
-"pre_flags": [ "WALL", { "flag": "DIGGABLE", "force_terrain": true } ], // Flags beginning furniture/terrain must have. force_ter forces the flag to apply to the underlying terrain
+"pre_flags": [ "WALL", { "flag": "DIGGABLE", "force_terrain": true } ], // Flags beginning furniture/terrain must have. force_ter forces the flag to apply to the underlying terrain. Must be defined in flags.json
 "post_terrain": "t_pit_spiked",                                     // Terrain type after construction is complete
 "post_special": "done_mine_upstairs",                               // Required to do something beyond setting the post terrain. The syntax also allows for a square bracket enclosed list of specials which all have to be fulfilled
 "pre_note": "Build a spikes on a diggable terrain",                 // Create an annotation to this recipe
@@ -2160,9 +2160,11 @@ specification for it in `event.h`:
 
 <!-- {% raw %} -->
 ```cpp
+using event_field = std::pair<const char *, cata_variant_type>;
+//...
 template<>
 struct event_spec<event_type::gains_skill_level> {
-    static constexpr std::array<std::pair<const char *, cata_variant_type>, 3> fields = {{
+    static constexpr std::array<event_field, 3> fields = {{
             { "character", cata_variant_type::character_id },
             { "skill", cata_variant_type::skill_id },
             { "new_level", cata_variant_type::int_ },
