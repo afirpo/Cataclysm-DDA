@@ -166,6 +166,11 @@ void oter_vision::load_oter_vision( const JsonObject &jo, const std::string &src
     oter_vision_factory.load( jo, src );
 }
 
+void oter_vision::finalize_all()
+{
+    oter_vision_factory.finalize();
+}
+
 void oter_vision::reset()
 {
     oter_vision_factory.reset();
@@ -479,7 +484,7 @@ void overmap_land_use_code::load( const JsonObject &jo, const std::string &src )
                                     << id.c_str() << " (" << name << ")";
     }
 
-    assign( jo, "color", color );
+    optional( jo, was_loaded, "color", color, nc_color_reader{} );
 
 }
 
@@ -500,9 +505,7 @@ void overmap_land_use_codes::load( const JsonObject &jo, const std::string &src 
 
 void overmap_land_use_codes::finalize()
 {
-    for( const overmap_land_use_code &elem : land_use_codes.get_all() ) {
-        const_cast<overmap_land_use_code &>( elem ).finalize(); // This cast is ugly, but safe.
-    }
+    land_use_codes.finalize();
 }
 
 void overmap_land_use_codes::check_consistency()
@@ -533,9 +536,7 @@ void city_buildings::load( const JsonObject &jo, const std::string &src )
 
 void overmap_specials::finalize()
 {
-    for( const overmap_special &elem : specials.get_all() ) {
-        const_cast<overmap_special &>( elem ).finalize(); // This cast is ugly, but safe.
-    }
+    specials.finalize();
 }
 
 void overmap_specials::finalize_mapgen_parameters()
@@ -859,7 +860,7 @@ void oter_vision::level::deserialize( const JsonObject &jo )
     }
     mandatory( jo, false, "name", name );
     mandatory( jo, false, "sym", symbol, unicode_codepoint_from_symbol_reader );
-    assign( jo, "color", color );
+    optional( jo, false, "color", color, nc_color_reader{} );
     optional( jo, false, "looks_like", looks_like );
 }
 
@@ -923,7 +924,7 @@ void oter_type_t::load( const JsonObject &jo, const std::string &src )
     assign( jo, "entry_eoc", entry_EOC, strict );
     assign( jo, "exit_eoc", exit_EOC, strict );
     assign( jo, "spawns", static_spawns, strict );
-    assign( jo, "color", color );
+    optional( jo, was_loaded, "color", color, nc_color_reader{} );
     assign( jo, "land_use_code", land_use_code, strict );
 
     if( jo.has_member( "looks_like" ) ) {
@@ -1263,10 +1264,6 @@ void overmap_terrains::check_consistency()
 void overmap_terrains::finalize()
 {
     terrain_types.finalize();
-
-    for( const oter_type_t &elem : terrain_types.get_all() ) {
-        const_cast<oter_type_t &>( elem ).finalize(); // This cast is ugly, but safe.
-    }
 
     if( region_settings_map.find( "default" ) == region_settings_map.end() ) {
         debugmsg( "ERROR: can't find default overmap settings (region_map_settings 'default'), "
@@ -7551,6 +7548,11 @@ std::string oter_get_rotation_string( const oter_id &oter )
 void overmap_special_migration::load_migrations( const JsonObject &jo, const std::string &src )
 {
     migrations.load( jo, src );
+}
+
+void overmap_special_migration::finalize_all()
+{
+    migrations.finalize();
 }
 
 void overmap_special_migration::reset()

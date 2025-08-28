@@ -26,6 +26,7 @@
 #include "weakpoint.h"
 
 class Creature;
+class JsonValue;
 class monster;
 enum class creature_size : int;
 enum class phase_id : int;
@@ -43,7 +44,6 @@ using mon_action_death  = void ( * )( monster & );
 using mon_action_attack = bool ( * )( monster * );
 using mon_action_defend = void ( * )( monster &, Creature *, dealt_projectile_attack const * );
 using bodytype_id = std::string;
-class JsonArray;
 class JsonObject;
 
 // These are triggers which may affect the monster's anger or morale.
@@ -76,6 +76,7 @@ struct mon_flag {
 
     void load( const JsonObject &jo, std::string_view src );
     static void load_mon_flags( const JsonObject &jo, const std::string &src );
+    static void finalize_all();
     static void reset();
     static const std::vector<mon_flag> &get_all();
 };
@@ -173,6 +174,7 @@ extern mon_flag_id mon_flag_ACIDPROOF,
        mon_flag_PATH_AVOID_FALL,
        mon_flag_PATH_AVOID_FIRE,
        mon_flag_PAY_BOT,
+       mon_flag_PERMANENT_INVISIBILITY,
        mon_flag_PET_HARNESSABLE,
        mon_flag_PET_MOUNTABLE,
        mon_flag_PET_WONT_FOLLOW,
@@ -262,6 +264,8 @@ struct move_skills_data {
     bool was_loaded = false;
     void load( const JsonObject &jo );
     void deserialize( const JsonObject &data );
+    bool handle_extend( const JsonValue &jv );
+    bool handle_delete( const JsonValue &jv );
 };
 
 enum class mdeath_type {
@@ -601,24 +605,7 @@ struct mtype {
         void faction_display( catacurses::window &w, const point &top_left, int width ) const;
 
         // Historically located in monstergenerator.cpp
-        void load( const JsonObject &jo, const std::string &src );
-
-    private:
-
-        void add_special_attacks( const JsonObject &jo, std::string_view member_name,
-                                  const std::string &src );
-        void remove_special_attacks( const JsonObject &jo, std::string_view member_name,
-                                     std::string_view src );
-
-        void add_special_attack( const JsonArray &inner, std::string_view src );
-        void add_special_attack( const JsonObject &obj, const std::string &src );
-
-        void add_regeneration_modifiers( const JsonObject &jo, std::string_view member_name,
-                                         std::string_view src );
-        void remove_regeneration_modifiers( const JsonObject &jo, std::string_view member_name,
-                                            std::string_view src );
-
-        void add_regeneration_modifier( const JsonArray &inner, std::string_view src );
+        void load( const JsonObject &jo, std::string_view src );
 };
 
 #endif // CATA_SRC_MTYPE_H
