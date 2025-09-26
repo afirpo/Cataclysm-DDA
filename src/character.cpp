@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "action.h"
+#include "activity_actor.h"
 #include "activity_actor_definitions.h"
 #include "activity_handlers.h"
 #include "addiction.h"
@@ -128,8 +129,6 @@
 #include "weather.h"
 #include "weather_type.h"
 #include "wound.h"
-
-class activity_actor;
 
 static const activity_id ACT_AUTODRIVE( "ACT_AUTODRIVE" );
 static const activity_id ACT_CONSUME_DRINK_MENU( "ACT_CONSUME_DRINK_MENU" );
@@ -2236,7 +2235,7 @@ bool Character::has_min_manipulators() const
 bool Character::has_two_arms_lifting() const
 {
     // 0.5f is one "standard" arm, so if you have more than that you barely qualify.
-    return get_limb_score( limb_score_lift, body_part_type::type::arm ) > 0.5f;
+    return get_limb_score( limb_score_lift, bp_type::arm ) > 0.5f;
 }
 
 std::set<matec_id> Character::get_limb_techs() const
@@ -2255,7 +2254,7 @@ std::set<matec_id> Character::get_limb_techs() const
 int Character::get_working_arm_count() const
 {
     int limb_count = 0;
-    body_part_type::type arm_type = body_part_type::type::arm;
+    bp_type arm_type = bp_type::arm;
     for( const bodypart_id &part : get_all_body_parts_of_type( arm_type ) ) {
         // Almost broken or overencumbered arms don't count
         if( get_part( part )->get_limb_score( *this,
@@ -2273,7 +2272,7 @@ bool Character::enough_working_legs() const
     int limb_count = 0;
     int working_limb_count = 0;
     for( const bodypart_id &part : get_all_body_parts() ) {
-        if( part->primary_limb_type() == body_part_type::type::leg ) {
+        if( part->primary_limb_type() == bp_type::leg ) {
             limb_count++;
             if( !is_limb_broken( part ) ) {
                 working_limb_count++;
@@ -2289,7 +2288,7 @@ int Character::get_working_leg_count() const
 {
     int working_limb_count = 0;
     for( const bodypart_id &part : get_all_body_parts() ) {
-        if( part->primary_limb_type() == body_part_type::type::leg ) {
+        if( part->primary_limb_type() == bp_type::leg ) {
             if( !is_limb_broken( part ) ) {
                 working_limb_count++;
             }
@@ -4219,7 +4218,7 @@ int layer_details::layer( const int encumbrance, bool conflicts )
     return total - current;
 }
 
-int Character::avg_encumb_of_limb_type( body_part_type::type part_type ) const
+int Character::avg_encumb_of_limb_type( bp_type part_type ) const
 {
     float limb_encumb = 0.0f;
     int num_limbs = 0;
@@ -5801,7 +5800,7 @@ bool Character::check_immunity_data( const field_immunity_data &ft ) const
         }
     }
     bool immune_by_body_part_resistance = !ft.immunity_data_body_part_env_resistance.empty();
-    for( const std::pair<body_part_type::type, int> &fide :
+    for( const std::pair<bp_type, int> &fide :
          ft.immunity_data_body_part_env_resistance ) {
         for( const bodypart_id &bp : get_all_body_parts_of_type( fide.first ) ) {
             if( get_env_resist( bp ) < fide.second ) {
@@ -5818,7 +5817,7 @@ bool Character::check_immunity_data( const field_immunity_data &ft ) const
 
     bool immune_by_worn_flags = !ft.immunity_data_part_item_flags.empty();
     // Check if all worn flags are fulfilled
-    for( const std::pair<body_part_type::type, flag_id> &fide :
+    for( const std::pair<bp_type, flag_id> &fide :
          ft.immunity_data_part_item_flags ) {
         for( const bodypart_id &bp : get_all_body_parts_of_type( fide.first ) ) {
             if( !worn_with_flag( fide.second, bp ) ) {
@@ -5835,7 +5834,7 @@ bool Character::check_immunity_data( const field_immunity_data &ft ) const
     }
 
     // Check if the optional worn flags are fulfilled
-    for( const std::pair<body_part_type::type, flag_id> &fide :
+    for( const std::pair<bp_type, flag_id> &fide :
          ft.immunity_data_part_item_flags_any ) {
         for( const bodypart_id &bp : get_all_body_parts_of_type( fide.first ) ) {
             if( worn_with_flag( fide.second, bp ) ) {
@@ -6894,7 +6893,7 @@ void Character::recalc_limb_energy_usage()
     float total_limb_count = 0.0f;
     float bionic_limb_count = 0.0f;
     float bionic_powercost = 0;
-    body_part_type::type arm_type = body_part_type::type::arm;
+    bp_type arm_type = bp_type::arm;
     for( const bodypart_id &bp : get_all_body_parts_of_type( arm_type ) ) {
         total_limb_count++;
         if( bp->has_flag( json_flag_BIONIC_LIMB ) ) {
@@ -6919,7 +6918,7 @@ void Character::recalc_limb_energy_usage()
     total_limb_count = 0.0f;
     bionic_limb_count = 0.0f;
     bionic_powercost = 0;
-    body_part_type::type leg_type = body_part_type::type::leg;
+    bp_type leg_type = bp_type::leg;
     for( const bodypart_id &bp : get_all_body_parts_of_type( leg_type ) ) {
         total_limb_count++;
         if( bp->has_flag( json_flag_BIONIC_LIMB ) ) {
@@ -7324,8 +7323,8 @@ int Character::item_handling_cost( const item &it, bool penalties, int base_cost
         // Grabbed penalty scales for grabbed arms/hands
         int pen = 2;
         for( const effect &eff : get_effects_with_flag( json_flag_GRAB ) ) {
-            if( eff.get_bp()->primary_limb_type() == body_part_type::type::arm ||
-                eff.get_bp()->primary_limb_type() == body_part_type::type::hand ) {
+            if( eff.get_bp()->primary_limb_type() == bp_type::arm ||
+                eff.get_bp()->primary_limb_type() == bp_type::hand ) {
                 pen++;
             }
         }
@@ -7336,12 +7335,12 @@ int Character::item_handling_cost( const item &it, bool penalties, int base_cost
     if( !bulk_cost ) {
         // For single handed items use the least encumbered hand
         if( it.is_two_handed( *this ) ) {
-            for( const bodypart_id &part : get_all_body_parts_of_type( body_part_type::type::hand ) ) {
+            for( const bodypart_id &part : get_all_body_parts_of_type( bp_type::hand ) ) {
                 mv += encumb( part );
             }
         } else {
             int min_encumb = INT_MAX;
-            for( const bodypart_id &part : get_all_body_parts_of_type( body_part_type::type::hand ) ) {
+            for( const bodypart_id &part : get_all_body_parts_of_type( bp_type::hand ) ) {
                 min_encumb = std::min( min_encumb, encumb( part ) );
             }
             mv += min_encumb;
@@ -9120,6 +9119,13 @@ void Character::set_knows_creature_type( const mtype_id &c )
 void Character::assign_activity( const activity_id &type, int moves, int index, int pos,
                                  const std::string &name )
 {
+    // This is not a perfect safety net, but I don't know of another way to get all activity actors and what activity_ids might be associated with them.
+    for( const auto &actor_ptr : activity_actors::deserialize_functions ) {
+        if( actor_ptr.first == type ) {
+            debugmsg( "Tried to assign generic activity %s to activity that has an actor!", type.c_str() );
+            return;
+        }
+    }
     assign_activity( player_activity( type, moves, index, pos, name ) );
 }
 
@@ -13696,8 +13702,8 @@ bodypart_id Character::most_staunchable_bp( int &max_staunch )
         add_msg_debug( debugmode::DF_CHARACTER, "Wound care proficiency found, new limit %d", max_staunch );
     }
 
-    int num_broken_arms = get_num_broken_body_parts_of_type( body_part_type::type::arm );
-    int num_arms = get_num_body_parts_of_type( body_part_type::type::arm );
+    int num_broken_arms = get_num_broken_body_parts_of_type( bp_type::arm );
+    int num_arms = get_num_body_parts_of_type( bp_type::arm );
 
     // Don't warn about encumbrance if your arms are broken
     if( num_broken_arms ) {
@@ -13713,7 +13719,7 @@ bodypart_id Character::most_staunchable_bp( int &max_staunch )
     for( const bodypart_id &bp : get_all_body_parts() ) {
         intensity = get_effect_int( effect_bleed, bp );
         // Staunching a bleeding on one of your arms is hard (handle multiple arms)
-        if( bp->has_type( body_part_type::type::arm ) ) {
+        if( bp->has_type( bp_type::arm ) ) {
             intensity /= ( 1.0f - 1.0f / num_arms );
         }
         // Tourniquets make staunching easier, letting you treat arterial bleeds on your legs
@@ -13791,7 +13797,7 @@ void Character::pause()
         bodypart_id bp_id = most_staunchable_bp( max );
 
         // Don't warn about encumbrance if your arms are broken
-        int num_broken_arms = get_num_broken_body_parts_of_type( body_part_type::type::arm );
+        int num_broken_arms = get_num_broken_body_parts_of_type( bp_type::arm );
         if( num_broken_arms ) {
             add_msg_player_or_npc( m_warning,
                                    _( "Your broken limb significantly hampers your efforts to put pressure on a bleeding wound!" ),

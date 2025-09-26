@@ -290,6 +290,8 @@ static const ter_str_id ter_t_trunk( "t_trunk" );
 static const trait_id trait_NUMB( "NUMB" );
 static const trait_id trait_PSYCHOPATH( "PSYCHOPATH" );
 
+static const vpart_location_id vpart_location_structure( "structure" );
+
 static const vproto_id vehicle_prototype_none( "none" );
 
 static const zone_type_id zone_type_LOOT_IGNORE( "LOOT_IGNORE" );
@@ -8368,7 +8370,7 @@ bool vehicle_unfolding_activity_actor::unfold_vehicle( Character &p, bool check_
 
     const inventory &inv = p.crafting_inventory();
     for( const vpart_reference &vp : veh->get_all_parts() ) {
-        if( vp.info().location != "structure" ) {
+        if( vp.info().location != vpart_location_structure ) {
             continue;
         }
         if( invalid_pos( vp.pos_bub( here ) ) ) {
@@ -8909,7 +8911,7 @@ void pulp_activity_actor::send_final_message( Character &you ) const
         } else if( pd.stomps_only ) {
             tools = string_format(
                         _( "It took you some time, stomping corpses with nothing but your %1$s, and occasionally cutting it with a %2$s." ),
-                        you.get_random_body_part_of_type( body_part_type::type::leg )->accusative_multiple, pd.cut_tool );
+                        you.get_random_body_part_of_type( bp_type::leg )->accusative_multiple, pd.cut_tool );
         } else if( pd.weapon_only ) {
             tools = string_format(
                         _( "It took you some time, bashing corpses with your %1$s, with occasional cuts with a %2$s." ),
@@ -8922,7 +8924,7 @@ void pulp_activity_actor::send_final_message( Character &you ) const
     } else {
         if( pd.stomps_only ) {
             tools = string_format( _( "It took you some time, stomping corpses with nothing but your %1$s." ),
-                                   you.get_random_body_part_of_type( body_part_type::type::leg )->accusative_multiple );
+                                   you.get_random_body_part_of_type( bp_type::leg )->accusative_multiple );
         } else if( pd.weapon_only ) {
             tools = string_format( _( "It took you some time, bashing corpses with just your %1$s." ),
                                    pd.bash_tool );
