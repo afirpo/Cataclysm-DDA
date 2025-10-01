@@ -884,6 +884,8 @@ class item : public visitable
         std::vector<item_pocket *> get_all_standard_pockets();
         std::vector<item_pocket *> get_all_ablative_pockets();
         std::vector<const item_pocket *> get_all_ablative_pockets() const;
+        std::vector<const item_pocket *> get_all_contained_and_mod_pockets() const;
+        std::vector<item_pocket *> get_all_contained_and_mod_pockets();
         /**
          * Updates the pockets of this item to be correct based on the mods that are installed.
          * Pockets which are modified that contain an item will be spilled
@@ -3412,6 +3414,10 @@ class item : public visitable
     public:
         char invlet = 0;      // Inventory letter
         bool active = false; // If true, it has active effects to be processed
+        // for item cache
+        bool is_active() const {
+            return active;
+        }
         bool is_favorite = false;
 
         void set_favorite( bool favorite );

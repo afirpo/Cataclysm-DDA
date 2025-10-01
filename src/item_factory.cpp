@@ -2017,9 +2017,7 @@ void Item_factory::init()
     add_iuse( "MININUKE", &iuse::mininuke );
     add_iuse( "MOLOTOV_LIT", &iuse::molotov_lit );
     add_iuse( "MOP", &iuse::mop );
-    add_iuse( "MP3", &iuse::mp3 );
     add_iuse( "MP3_ON", &iuse::mp3_on );
-    add_iuse( "MP3_DEACTIVATE", &iuse::mp3_deactivate );
     add_iuse( "MULTICOOKER", &iuse::multicooker );
     add_iuse( "MULTICOOKER_TICK", &iuse::multicooker_tick );
     add_iuse( "MYCUS", &iuse::mycus );
@@ -2110,6 +2108,7 @@ void Item_factory::init()
     add_actor( std::make_unique<iuse_transform>() );
     add_actor( std::make_unique<unpack_actor>() );
     add_actor( std::make_unique<message_iuse>() );
+    add_actor( std::make_unique<mp3_iuse>() );
     add_actor( std::make_unique<sound_iuse>() );
     add_actor( std::make_unique<play_instrument_iuse>() );
     add_actor( std::make_unique<manualnoise_actor>() );
@@ -3485,6 +3484,7 @@ void islot_gunmod::deserialize( const JsonObject &jo )
     optional( jo, was_loaded, "min_str_required_mod", min_str_required_mod );
     optional( jo, was_loaded, "min_str_required_mod_if_prone", min_str_required_mod_if_prone );
     optional( jo, was_loaded, "is_bayonet", is_bayonet );
+    optional( jo, was_loaded, "is_visible_when_installed", is_visible_when_installed );
     optional( jo, was_loaded, "blacklist_mod", blacklist_mod, auto_flags_reader<itype_id> {} );
     optional( jo, was_loaded, "blacklist_slot", blacklist_slot, auto_flags_reader<gunmod_location> {} );
     optional( jo, was_loaded, "barrel_length", barrel_length );
@@ -3737,7 +3737,9 @@ void Item_factory::add_special_pockets( itype &def )
         def.pockets.emplace_back( pocket_type::CORPSE );
     }
     if( ( def.tool || def.gun ) && !has_pocket_type( def.pockets, pocket_type::MOD ) ) {
-        def.pockets.emplace_back( pocket_type::MOD );
+        pocket_data mod_pocket( pocket_type::MOD );
+        mod_pocket.transparent = true;
+        def.pockets.emplace_back( mod_pocket );
     }
     if( !has_pocket_type( def.pockets, pocket_type::MIGRATION ) ) {
         def.pockets.emplace_back( pocket_type::MIGRATION );

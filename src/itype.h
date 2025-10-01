@@ -980,6 +980,11 @@ struct islot_gunmod : common_ranged_data {
     // wheter the item is supposed to work as a bayonet when attached
     bool is_bayonet = false;
 
+    /** if the item is visible and selectable in the inventory menu
+    used by mounted flashlights and similar
+    */
+    bool is_visible_when_installed = false;
+
     /** Not compatible on weapons that have this mod slot */
     std::set<gunmod_location> blacklist_slot;
 
@@ -1634,6 +1639,9 @@ struct itype {
 
         bool can_use( const std::string &iuse_name ) const;
         const use_function *get_use( const std::string &iuse_name ) const;
+        // can use/get_use, but for tick actions
+        bool has_tick( const std::string &iuse_name ) const;
+        const use_function *get_tick( const std::string &iuse_name ) const;
 
         // Here "invoke" means "actively use". "Tick" means "active item working"
         // TODO: Replace usage of map less overload.

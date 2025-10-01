@@ -409,6 +409,7 @@ Character flags can be `trait_id`, `json_flag_id` or `flag_id`.  Some of these a
 - ```MYOPIC_SUPERNATURAL``` You are nearsighted in such a way that glasses cannot fix it, such as by magic.
 - ```MYOPIC_IN_LIGHT_SUPERNATURAL``` You are nearsighted in light in such a way that glasses cannot fix it, such as by magic.
 - ```NIGHT_VISION``` You can see in the dark.
+- ```NO_CBM_INSTALLATION``` You are unable to install any CBMs.
 - ```NO_DISEASE``` This mutation grants immunity to diseases.
 - ```NO_RADIATION``` This mutation grants immunity to radiations.
 - ```NO_SCENT``` You have no scent.
@@ -1576,8 +1577,6 @@ These flags apply to the `use_action` field, instead of the `flags` field.
 - ```MOLOTOV_LIT``` Throw it, but don't drop it.
 - ```MOLOTOV``` Light the Molotov cocktail.
 - ```MOP``` Mop up the mess.
-- ```MP3_ON``` Turn the mp3 player off.
-- ```MP3``` Turn the mp3 player on.
 - ```NOISE_EMITTER_OFF``` Turn the noise emitter on.
 - ```NOISE_EMITTER_ON``` Turn the noise emitter off.
 - ```NONE``` Do nothing.
