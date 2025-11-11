@@ -708,6 +708,7 @@ class item : public visitable
 
         units::length length() const;
         units::length barrel_length() const;
+        units::length sawn_off_reduction() const;
 
         /**
          * Simplified, faster volume check for when processing time is important and exact volume is not.
@@ -1213,15 +1214,17 @@ class item : public visitable
             rot += val;
         }
 
+        bool is_smokable() const;
+
         /** Time for this item to be fully fermented. */
         time_duration brewing_time() const;
         /** The results of fermenting this item. */
-        const std::map<itype_id, int> &brewing_results() const;
+        const std::map<std::pair<itype_id, std::string>, int> &brewing_results() const;
 
         /** Time for this item to be fully fermented. */
         time_duration composting_time() const;
         /** The results of fermenting this item. */
-        const std::map<itype_id, int> &composting_results() const;
+        const std::map<std::pair<itype_id, std::string>, int> &composting_results() const;
 
         /**
          * Detonates the item and adds remains (if any) to drops.
@@ -1956,6 +1959,7 @@ class item : public visitable
          */
         void on_contents_changed();
 
+        bool can_use_relic( const Character &guy ) const;
         bool use_relic( Character &guy, const tripoint_bub_ms &pos );
         bool has_relic_recharge() const;
         bool has_relic_activation() const;
@@ -3225,6 +3229,8 @@ class item : public visitable
          */
         void update_prefix_suffix_flags();
         void update_prefix_suffix_flags( const flag_id &flag );
+
+        void inherit_rot_from_components( item &it );
 
     public:
         enum class sizing : int {

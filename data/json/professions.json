@@ -537,11 +537,6 @@
   },
   {
     "type": "profession_item_substitutions",
-    "item": "gum",
-    "sub": [ { "present": [ "ANTIJUNK" ], "new": [ "nic_gum" ] } ]
-  },
-  {
-    "type": "profession_item_substitutions",
     "item": "sandwich_pbj",
     "sub": [
       { "present": [ "ANTIFRUIT" ], "absent": [ "ANTIWHEAT" ], "new": [ "sandwich_pbh" ] },
@@ -711,6 +706,7 @@
   {
     "type": "profession",
     "id": "unemployed",
+    "//": "This profession is meant to convey an average person who has not prepared for the Cataclysm at all. Starting out unprepared is fully intentional, and this scenario is not meant to aid new players.",
     "name": "Survivor",
     "description": "Some would say that there's nothing particularly notable about you, but you've survived, and that's more than most could say right now.",
     "npc_background": "BG_survival_story_EVACUEE",
@@ -722,13 +718,8 @@
           { "item": "longshirt" },
           { "item": "socks" },
           { "item": "sneakers" },
-          { "item": "mbag" },
-          { "item": "pockknife" },
-          { "item": "water_clean" },
-          { "item": "wristwatch" },
           { "group": "charged_smart_phone", "contents-item": "guidebook" },
-          { "group": "starter_wallet_full" },
-          { "group": "charged_matches" }
+          { "group": "starter_wallet_full" }
         ]
       },
       "male": { "entries": [ { "item": "boxer_shorts" } ] },
@@ -1197,7 +1188,7 @@
           { "item": "cleats" },
           { "item": "helmet_ball" },
           { "item": "sports_drink" },
-          { "item": "gum" },
+          { "group": "chewing_gum_used" },
           { "group": "charged_smart_phone", "contents-item": "book_fict_soft_sports_bunt" },
           { "group": "starter_wallet_full" },
           { "item": "bat", "custom-flags": [ "auto_wield" ] },
@@ -3166,7 +3157,7 @@
           { "item": "sunglasses" },
           { "item": "hat_boonie" },
           { "group": "charged_smart_watch_adv" },
-          { "item": "caff_gum" },
+          { "group": "chewing_gum_used_caff" },
           { "group": "charged_smart_phone", "contents-item": "book_archery" },
           { "group": "starter_wallet_full" },
           { "item": "rashguard", "variant": "black_rashguard_shirt" },
@@ -3957,7 +3948,7 @@
           { "item": "sneakers" },
           { "item": "mbag" },
           { "item": "caffeine", "count": 10, "container-item": "null", "entry-wrapper": "bottle_plastic_small" },
-          { "item": "caff_gum", "count": 3 },
+          { "group": "chewing_gum_used_caff" },
           { "item": "memory_card", "contents-item": "textbook_computer" },
           { "item": "usb_drive", "contents-item": "SICP" },
           { "item": "portable_game", "charges": 150 },
@@ -4709,7 +4700,7 @@
           { "item": "jumpsuit_pocketless", "variant": "orange" },
           { "item": "sneakers" },
           { "item": "socks" },
-          { "item": "gum" },
+          { "group": "chewing_gum_used" },
           { "group": "charged_cell_phone" }
         ]
       },

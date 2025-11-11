@@ -458,39 +458,6 @@ void overmap::unserialize( std::istream &fin )
     unserialize( jsin.get_object() );
 }
 
-// In global scope for testing
-// NOLINTNEXTLINE(cata-static-declarations)
-std::string base64_encode_bitset( const std::bitset<576> &bitset_to_encode );
-std::string base64_encode_bitset( const std::bitset<576> &bitset_to_encode )
-{
-    std::string raw_bitset_data( 72, '\0' );
-    for( uint64_t i = 0; i < 9; ++i ) {
-        uint64_t bits = 0;
-        for( size_t j = 0; j < sizeof( bits ) * 8; ++j ) {
-            if( bitset_to_encode[( i * 64 ) + j ] ) {
-                bits |= 1ULL << j;
-            }
-        }
-        memcpy( &raw_bitset_data[ i * 8 ], &bits, sizeof( bits ) );
-    }
-    return base64_encode( raw_bitset_data );
-}
-
-// In global scope for testing
-// NOLINTNEXTLINE(cata-static-declarations)
-void base64_decode_bitset( const std::string &packed_bitset, std::bitset<576> &destination_bitset );
-void base64_decode_bitset( const std::string &packed_bitset, std::bitset<576> &destination_bitset )
-{
-    std::string decoded_string = base64_decode( packed_bitset );
-    for( int i = 0; i < 9; i++ ) {
-        uint64_t bits;
-        memcpy( &bits, &decoded_string[( 8 - i ) * 8], sizeof( bits ) );
-        std::bitset<576> temp_bitset( bits );
-        destination_bitset <<= 64;
-        destination_bitset |= temp_bitset;
-    }
-}
-
 void overmap::unserialize( const JsonObject &jsobj )
 {
     // These must be read in this order.
@@ -1710,7 +1677,7 @@ void game::unserialize_master( const JsonValue &jv )
         } else if( name == "timed_events" ) {
             timed_event_manager::unserialize_all( jsin );
         } else if( name == "overmapbuffer" ) {
-            overmap_buffer.deserialize_overmap_global_state( jsin );
+            overmap_buffer.global_state.deserialize( jsin );
         } else if( name == "placed_unique_specials" ) {
             overmap_buffer.deserialize_placed_unique_specials( jsin );
         }
@@ -1737,7 +1704,7 @@ void game::unserialize_dimension_data( const JsonValue &jv )
         if( name == "weather" ) {
             weather_manager::unserialize_all( jsin );
         } else if( name == "overmapbuffer" ) {
-            overmap_buffer.deserialize_overmap_global_state( jsin );
+            overmap_buffer.global_state.deserialize( jsin );
         } else if( name == "placed_unique_specials" ) {
             overmap_buffer.deserialize_placed_unique_specials( jsin );
         } else if( name == "region_type" ) {
@@ -1890,7 +1857,7 @@ void game::serialize_dimension_data( std::ostream &fout )
         json.start_object();
 
         json.member( "overmapbuffer" );
-        overmap_buffer.serialize_overmap_global_state( json );
+        overmap_buffer.global_state.serialize( json );
 
         json.member( "weather" );
         weather_manager::serialize_all( json );
@@ -2020,12 +1987,12 @@ void creature_tracker::serialize( JsonOut &jsout ) const
     jsout.end_array();
 }
 
-void overmapbuffer::serialize_overmap_global_state( JsonOut &json ) const
+void overmap_global_state::serialize( JsonOut &json ) const
 {
     json.start_object();
     json.member( "placed_unique_specials" );
     json.write_as_array( placed_unique_specials );
-    json.member( "overmap_count", overmap_buffer.overmap_count );
+    json.member( "overmap_count", overmap_count );
     json.member( "unique_special_count", unique_special_count );
     json.member( "overmap_highway_intersections", highway_intersections );
     json.member( "overmap_highway_offset", highway_global_offset );
@@ -2034,7 +2001,7 @@ void overmapbuffer::serialize_overmap_global_state( JsonOut &json ) const
     json.end_object();
 }
 
-void overmapbuffer::deserialize_overmap_global_state( const JsonObject &json )
+void overmap_global_state::deserialize( const JsonObject &json )
 {
     placed_unique_specials.clear();
     JsonArray ja = json.get_array( "placed_unique_specials" );
@@ -2053,10 +2020,10 @@ void overmapbuffer::deserialize_overmap_global_state( const JsonObject &json )
 
 void overmapbuffer::deserialize_placed_unique_specials( const JsonValue &jsin )
 {
-    placed_unique_specials.clear();
+    global_state.placed_unique_specials.clear();
     JsonArray ja = jsin.get_array();
     for( const JsonValue &special : ja ) {
-        placed_unique_specials.emplace( special.get_string() );
+        global_state.placed_unique_specials.emplace( special.get_string() );
     }
 }
 

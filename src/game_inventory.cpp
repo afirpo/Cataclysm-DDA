@@ -1120,6 +1120,10 @@ class activatable_inventory_preset : public pickup_inventory_preset
             const item &it = *loc;
             const auto &uses = it.type->use_methods;
 
+            if( it.has_relic_activation() && !it.can_use_relic( you ) ) {
+                return string_format( _( "The %s can't be used like that." ), it.tname() );
+            }
+
             const auto &comest = it.get_comestible();
             if( comest && !comest->tool.is_null() ) {
                 const bool has = item::count_by_charges( comest->tool )
@@ -2488,7 +2492,7 @@ class smokable_selector_preset : public inventory_selector_preset
 {
     public:
         bool is_shown( const item_location &location ) const override {
-            return !location->rotten() && location->has_flag( flag_SMOKABLE );
+            return !location->rotten() && location->is_smokable();
         }
 };
 

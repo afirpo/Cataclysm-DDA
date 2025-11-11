@@ -354,7 +354,8 @@
     "items": [
       [ "towel", 15 ],
       { "item": "soap", "prob": 15, "charges": [ 1, 10 ] },
-      { "item": "detergent", "prob": 15, "charges": [ 1, 20 ] },
+      { "item": "detergent", "prob": 10, "charges": [ 1, 20 ] },
+      { "item": "chem_borax", "prob": 10, "charges": [ 100, 500 ] },
       { "item": "bleach", "prob": 15, "charges": [ 1, -1 ] },
       [ "broom", 13 ],
       { "item": "fursuit", "variant": "dinosuit", "prob": 7 },
@@ -487,7 +488,8 @@
       { "item": "hat_ball", "prob": 25 },
       { "item": "towel", "prob": 10 },
       { "item": "soap", "prob": 8, "charges": [ 1, 10 ] },
-      { "item": "detergent", "prob": 8, "charges": [ 1, 20 ] },
+      { "item": "detergent", "prob": 4, "charges": [ 1, 20 ] },
+      { "item": "chem_borax", "prob": 4, "charges": [ 100, 500 ] },
       { "item": "cotton_patchwork", "prob": 15 },
       { "item": "broom", "prob": 8 },
       { "item": "bleach", "prob": 8, "charges": [ 1, -1 ] },
@@ -598,7 +600,8 @@
       { "item": "sm_extinguisher", "prob": 40, "charges": 10 },
       { "item": "towel", "prob": 40 },
       { "item": "soap", "prob": 30, "charges": [ 1, 10 ] },
-      { "item": "detergent", "prob": 30, "charges": [ 1, 20 ] },
+      { "item": "detergent", "prob": 15, "charges": [ 1, 20 ] },
+      { "item": "chem_borax", "prob": 15, "charges": [ 100, 500 ] },
       { "item": "cotton_patchwork", "prob": 30 },
       { "item": "bleach", "prob": 30, "charges": [ 1, -1 ] },
       { "item": "vinegar", "prob": 30, "charges": [ 1, -1 ] },
@@ -1736,8 +1739,9 @@
       { "prob": 20, "group": "sugar_bottle_plastic" },
       { "prob": 20, "group": "sugar_bottle_glass" },
       { "prob": 5, "group": "sugar_bag_plastic" },
-      { "prob": 10, "group": "sugar_bag_paper" },
-      { "prob": 2, "group": "sugar_bag_paper_bulk" }
+      { "prob": 42, "group": "sugar_bag_paper" },
+      { "prob": 16, "group": "sugar_bag_paper_bulk" },
+      { "prob": 2, "group": "sugar_bag_paper_50lb" }
     ]
   },
   {
@@ -1799,6 +1803,13 @@
     "//": "one pound of sugar in a paper bag.",
     "container-item": "bag_paper_powder",
     "entries": [ { "item": "sugar", "container-item": "null", "count": 71 } ]
+  },
+  {
+    "type": "item_group",
+    "id": "sugar_bag_paper_50lb",
+    "subtype": "collection",
+    "container-item": "bag_paper_powder_50lb",
+    "entries": [ { "item": "sugar", "container-item": "null", "count": [ 121, 4700 ] } ]
   },
   {
     "type": "item_group",
@@ -1880,7 +1891,8 @@
     "entries": [
       { "prob": 5, "group": "flour_bag_plastic" },
       { "prob": 20, "group": "flour_bag_paper" },
-      { "prob": 2, "group": "flour_bag_paper_bulk" }
+      { "prob": 12, "group": "flour_bag_paper_bulk" },
+      { "prob": 12, "group": "flour_bag_paper_50lb" }
     ]
   },
   {
@@ -1920,6 +1932,13 @@
     "//": "This group was created automatically and may contain errors.",
     "container-item": "bag_plastic_small",
     "entries": [ { "item": "flour", "container-item": "null", "count": [ 2, 20 ] } ]
+  },
+  {
+    "type": "item_group",
+    "id": "flour_bag_paper_50lb",
+    "subtype": "collection",
+    "container-item": "bag_paper_powder_50lb",
+    "entries": [ { "item": "flour", "container-item": "null", "count": [ 10, 1850 ] } ]
   },
   {
     "type": "item_group",
@@ -2036,8 +2055,9 @@
       { "prob": 20, "group": "salt_bottle_plastic" },
       { "prob": 20, "group": "salt_bottle_glass" },
       { "prob": 5, "group": "salt_bag_plastic" },
-      { "prob": 10, "group": "salt_bag_paper" },
-      { "prob": 2, "group": "salt_bag_paper_bulk" }
+      { "prob": 17, "group": "salt_bag_paper" },
+      { "prob": 9, "group": "salt_bag_paper_bulk" },
+      { "prob": 3, "group": "salt_bag_paper_50lb" }
     ]
   },
   {
@@ -2091,6 +2111,13 @@
     "//": "This group was created automatically and may contain errors.",
     "container-item": "bag_paper_powder_bulk",
     "entries": [ { "item": "salt", "container-item": "null", "count": [ 25, 2000 ] } ]
+  },
+  {
+    "type": "item_group",
+    "id": "salt_bag_paper_50lb",
+    "subtype": "collection",
+    "container-item": "bag_paper_powder_50lb",
+    "entries": [ { "item": "salt", "container-item": "null", "count": [ 125, 6480 ] } ]
   },
   {
     "type": "item_group",

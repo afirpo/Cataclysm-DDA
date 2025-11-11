@@ -108,6 +108,24 @@ std::string enum_to_string<mdeath_type>( mdeath_type data )
 
 } // namespace io
 
+template<>
+const mtype &int_id<mtype>::obj() const
+{
+    return MonsterGenerator::generator().mon_templates->obj( *this );
+}
+
+template<>
+bool int_id<mtype>::is_valid() const
+{
+    return MonsterGenerator::generator().mon_templates->is_valid( *this );
+}
+
+template<>
+const string_id<mtype> &int_id<mtype>::id() const
+{
+    return MonsterGenerator::generator().mon_templates->convert( *this );
+}
+
 /** @relates string_id */
 template<>
 const mtype &string_id<mtype>::obj() const
@@ -120,6 +138,12 @@ template<>
 bool string_id<mtype>::is_valid() const
 {
     return MonsterGenerator::generator().mon_templates->is_valid( *this );
+}
+
+template<>
+int_id<mtype> string_id<mtype>::id() const
+{
+    return MonsterGenerator::generator().mon_templates->convert( *this, int_id<mtype>( 0 ) );
 }
 
 /** @relates string_id */
@@ -658,7 +682,6 @@ void MonsterGenerator::init_attack()
     add_hardcoded_attack( "PARROT", mattack::parrot );
     add_hardcoded_attack( "PARROT_AT_DANGER", mattack::parrot_at_danger );
     add_hardcoded_attack( "BLOW_WHISTLE", mattack::blow_whistle );
-    add_hardcoded_attack( "DARKMAN", mattack::darkman );
     add_hardcoded_attack( "SLIMESPRING", mattack::slimespring );
     add_hardcoded_attack( "EVOLVE_KILL_STRIKE", mattack::evolve_kill_strike );
     add_hardcoded_attack( "LEECH_SPAWNER", mattack::leech_spawner );

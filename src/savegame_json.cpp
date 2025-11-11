@@ -766,6 +766,8 @@ void Character::load( const JsonObject &data )
 
     data.read( "proficiencies", _proficiencies );
 
+    _proficiencies->migrate_proficiencies();
+
     // If the proficiency XP required has changed such that a proficiency is now known
     for( const proficiency_id &prof : _proficiencies->learning_profs() ) {
         if( _proficiencies->pct_practiced_time( prof ) >= prof->time_to_learn() ) {
@@ -2758,7 +2760,7 @@ void time_duration::deserialize( const JsonValue &jsin )
 {
     if( jsin.test_string() ) {
         if( std::string const &str = jsin.get_string(); str == "infinite" ) {
-            *this = calendar::INDEFINITELY_LONG_DURATION;
+            *this = time_duration::from_turns( calendar::INDEFINITELY_LONG );
         } else {
             *this = read_from_json_string<time_duration>( jsin, time_duration::units );
         }
@@ -3941,6 +3943,8 @@ void Creature::load( const JsonObject &jsin )
         jsin.read( "effects", *effects );
     }
 
+    migrate_effects();
+
     // u/npc variables
     jsin.read( "values", values );
     // potentially migrate some values
@@ -4343,7 +4347,7 @@ void deserialize( recipe_subset &value, const JsonArray &ja )
     value.clear();
     for( std::string && recipe_id_string : ja ) {
         recipe_id rid( std::move( recipe_id_string ) );
-        if( !rid.is_valid() ) {
+        if( !rid.is_valid() && rid != recipe_id::NULL_ID() ) {
             DebugLog( DebugLevel::D_WARNING, DebugClass::D_MAIN )
                     << "recipe_subset deserialized invalid recipe_id '" << rid.str() << "'";
             rid = recipe_id::NULL_ID();
